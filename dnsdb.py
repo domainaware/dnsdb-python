@@ -201,18 +201,23 @@ class DNSDBAPI(object):
     A Python interface to the Farsight Security DNSDB API
     ..
     """
-    _root = "https://api.dnsdb.info"
 
-    def __init__(self, api_key=None, client_name=None, client_version=None):
+    def __init__(self, api_key=None, client_name=None, client_version=None,
+                 url_root="https://api.dnsdb.info"):
         """
         Configures the API client
 
         Args:
             api_key (str): WhoisXMLAPI API key; overridden by the
             ``WHOIS_KEY`` environment variable
+            client_name (str): The client's name
+            client_version (str): The client's version
+            url_root (str): The root URL of the DNSDB API
         """
         if "DNSDB_KEY" in os.environ:
             api_key = os.environ["DNSDB_KEY"]
+        if "DNSDB_ROOT" in os.environ:
+            url_root = os.environ["DNSDB_ROOT"]
         if api_key is None:
             raise InvalidAPIKey(
                 " An API key must provided as the api_key parameter, or the "
@@ -226,6 +231,7 @@ class DNSDBAPI(object):
 
         user_agent = "{0}/{1}".format(self.client_name, self.client_version)
         default_headers = {"User-Agent": user_agent, "X-API-Key": api_key}
+        self._root = url_root
         self._api_key = api_key
         self._session = session()
         self._session.headers.update(default_headers)

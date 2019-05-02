@@ -2,8 +2,8 @@
 dnsdb-python
 ============
 
-A full-featured unofficial Python client and CLI for Farsight Security's DNSDB passive
-DNS service.
+A full-featured unofficial Python client and CLI for Farsight Security's DNSDB
+passive DNS service.
 
 ::
 
@@ -80,20 +80,32 @@ Features
 --------
 
 - Easy to use Python class covers all DNSDB API endpoints and options
+- Supports hosted and self-hosted instances of DNSDB
 - Full CLI
 - Python 2 and 3 support
 - Parses multiple human date formats for time filtering
 - Output in text (DNS master file format)
 - JSON output
-  - Outputs results as a pretty printed JSON list
-  - Sort output by any JSON field
-  - Automatically converts UNIX epoch timestamps to ISO 8601 timestamps
+   - Outputs results as a pretty printed JSON list
+   - Sort output by any JSON field
+   - Automatically converts UNIX epoch timestamps to ISO 8601 timestamps
 
 Installation
 ------------
+
+To install the latest stable version, run
 
 .. code-block:: bash
 
     pip3 install -U dnsdb-python
 
-Store your API key as an environment variable named ``DNSDB_KEY``
+To install the latest development version, run
+
+.. code-block:: bash
+
+    pip3 install -U git+https://github.com/domainaware/dnsdb-python.git
+
+Store your API key as an environment variable named ``DNSDB_KEY``.
+
+If you are using a self-hosted instance of DNSDB, store the URL toot as an
+environment variable named ``DNSDB_ROOT``.
