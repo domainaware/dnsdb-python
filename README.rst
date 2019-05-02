@@ -2,8 +2,8 @@
 dnsdb-python
 ============
 
-A full-featured unofficial Python client and CLI for Farsight Security's DNSDB
-passive DNS service.
+A full-featured unofficial Python client and CLI for
+`Farsight Security's DNSDB`_ passive DNS service.
 
 ::
 
@@ -44,7 +44,7 @@ passive DNS service.
       --last-seen-after TEXT          Only show results last seen after this date.
       -l, --limit INTEGER             Limit the number of results to this number.
       -j, --json                      Output in JSON format.
-      -s, --sort [count|time_first|time_last|zone_time_first|zone_time_last|rrname|rrtype|bailiwick|rdata]
+      -s, --sort [count|time_first|time_last|rrname|rrtype|bailiwick|rdata|source]
                                       Sort JSON results by this field.
       -r, --reverse                   Reverse the sorting.
       --help                          Show this message and exit.
@@ -71,7 +71,7 @@ passive DNS service.
       --last-seen-after TEXT          Only show results last seen after this date.
       -l, --limit INTEGER             Limit the number of results to this number.
       -j, --json                      Output in JSON format.
-      -s, --sort [count|time_first|time_last|zone_time_first|zone_time_last|rrname|rrtype|rdata]
+      -s, --sort [count|time_first|time_last|rrname|rrtype|bailiwick|rdata|source]
                                       Sort JSON results by this field.
       -r, --reverse                   Reverse the sorting.
       --help                          Show this message and exit.
@@ -89,6 +89,7 @@ Features
    - Outputs results as a pretty printed JSON list
    - Sort output by any JSON field
    - Automatically converts UNIX epoch timestamps to ISO 8601 timestamps
+   - Normalize timestamp fields for sensor and zone file observations
 
 Installation
 ------------
@@ -109,3 +110,5 @@ Store your API key as an environment variable named ``DNSDB_KEY``.
 
 If you are using a self-hosted instance of DNSDB, store the URL toot as an
 environment variable named ``DNSDB_ROOT``.
+
+..

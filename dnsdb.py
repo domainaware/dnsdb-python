@@ -161,24 +161,24 @@ def _load_json(dnsdb_json_string, sort_by=None, reverse=False):
     for line in dnsdb_json_string.split("\n"):
         if len(line) > 1:
             result = json.loads(line, encoding="uft-8")
+            if "zone_time_first" in result:
+                result["time_first"] = result["zone_time_first"]
+                result["time_last"] = result["zone_time_last"]
+                del result["zone_time_first"]
+                del result["zone_time_last"]
+                result["source"] = "zone"
+            else:
+                result["source"] = "sensor"
             results.append(result)
 
     if sort_by is not None:
-        missing_values = []
-        existing_values = []
-        for i in range(len(results)):
-            if sort_by not in results[i]:
-                missing_values.append(results[i])
-            else:
-                existing_values.append(results[i])
-
-        existing_values = list(sorted(
-            existing_values,
-            key=lambda x: x[sort_by],reverse=reverse)).copy()
-        if reverse:
-            results = (existing_values + missing_values).copy()
-        else:
-            results = (missing_values + existing_values).copy()
+        try:
+            results = list(sorted(
+                results,
+                key=lambda x: x[sort_by], reverse=reverse)).copy()
+        except KeyError:
+            raise KeyError("Unable to sort by {0}. "
+                           "Field does not exist".format(sort_by))
     for result in results:
         if "time_first" in result:
             result["time_first"] = _timestamp_to_iso8601(
@@ -186,12 +186,6 @@ def _load_json(dnsdb_json_string, sort_by=None, reverse=False):
         if "time_last" in result:
             result["time_last"] = _timestamp_to_iso8601(
                 result["time_last"])
-        if "zone_time_first" in result:
-            result["zone_time_first"] = _timestamp_to_iso8601(
-                result["zone_time_first"])
-        if "zone_time_last" in result:
-            result["zone_time_last"] = _timestamp_to_iso8601(
-                result["zone_time_last"])
 
     return results
 
@@ -480,8 +474,9 @@ def _get_quotas(ctx):
 @click.option("-s", "--sort", "sort_by",
               help="Sort JSON results by this field.",
               type=click.Choice(["count", "time_first", "time_last",
-                                 "zone_time_first", "zone_time_last",
-                                 "rrname", "rrtype", "bailiwick", "rdata"]))
+                                 "rrname", "rrtype", "bailiwick", "rdata",
+                                 "source"])
+              )
 @click.option("-r", "--reverse", is_flag=True, help="Reverse the sorting.")
 @click.pass_context
 def _forward_lookup(ctx, owner_name, rrtype="ANY", bailiwick=None,
@@ -536,8 +531,8 @@ def _forward_lookup(ctx, owner_name, rrtype="ANY", bailiwick=None,
 @click.option("-s", "--sort", "sort_by",
               help="Sort JSON results by this field.",
               type=click.Choice(["count", "time_first", "time_last",
-                                 "zone_time_first", "zone_time_last",
-                                 "rrname", "rrtype", "rdata"])
+                                 "rrname", "rrtype", "bailiwick", "rdata",
+                                 "source"])
               )
 @click.option("-r", "--reverse", is_flag=True, help="Reverse the sorting.")
 @click.pass_context
