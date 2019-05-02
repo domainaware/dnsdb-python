@@ -430,7 +430,12 @@ class _CLIConfig(object):
         else:
             logging.basicConfig(level=logging.WARNING,
                                 format="%(levelname)s: %(message)s")
-            self.client = DNSDBAPI()
+            try:
+                self.client = DNSDBAPI()
+            except InvalidAPIKey:
+                logging.error("API key missing or invalid. Store it in an "
+                              "environment variable named DNSDB_KEY.")
+                exit(-1)
 
 
 @click.group()
