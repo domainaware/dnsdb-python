@@ -113,8 +113,9 @@ environment variable named ``DNSDB_ROOT``.
 
 See also
 --------
-
+- `DNSDB Community Edition`_
 - `DNSDB API reference`_
 
 .. _Farsight Security's DNSDB: https://www.farsightsecurity.com/solutions/dnsdb/
+.. _DNSDB Community Edition: https://www.farsightsecurity.com/dnsdb-community-edition/
 .. _DNSDB API reference: https://api.dnsdb.info/
