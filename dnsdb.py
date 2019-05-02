@@ -433,8 +433,8 @@ class _CLIConfig(object):
             try:
                 self.client = DNSDBAPI()
             except InvalidAPIKey:
-                logging.error("API key missing or invalid. Store it in an "
-                              "environment variable named DNSDB_KEY.")
+                logging.error("DNSDB_KEY nvironment variable missing or "
+                              "invalid.")
                 exit(-1)
 
 
