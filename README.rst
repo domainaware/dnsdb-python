@@ -98,13 +98,13 @@ To install the latest stable version, run
 
 .. code-block:: bash
 
-    pip3 install -U dnsdb-python
+    sudo -H pip3 install -U dnsdb-python
 
 To install the latest development version, run
 
 .. code-block:: bash
 
-    pip3 install -U git+https://github.com/domainaware/dnsdb-python.git
+    sudo -H pip3 install -U git+https://github.com/domainaware/dnsdb-python.git
 
 Store your API key as an environment variable named ``DNSDB_KEY``.
 
