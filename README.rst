@@ -111,4 +111,10 @@ Store your API key as an environment variable named ``DNSDB_KEY``.
 If you are using a self-hosted instance of DNSDB, store the URL toot as an
 environment variable named ``DNSDB_ROOT``.
 
-..
+See also
+--------
+
+- `DNSDB API reference`_
+
+.. _Farsight Security's DNSDB: https://www.farsightsecurity.com/solutions/dnsdb/
+.. _DNSDB API reference: https://api.dnsdb.info/
