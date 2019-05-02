@@ -472,7 +472,10 @@ def _get_quotas(ctx):
 @click.option("-j", "--json", "_json", is_flag=True,
               help="Output in JSON format.")
 @click.option("-s", "--sort", "sort_by",
-              help="Sort JSON results by this field.")
+              help="Sort JSON results by this field.",
+              type=click.Choice(["count", "time_first", "time_last",
+                                 "zone_time_first", "zone_time_last",
+                                 "rrname", "rrtype", "bailiwick", "rdata"]))
 @click.option("-r", "--reverse", is_flag=True, help="Reverse the sorting.")
 @click.pass_context
 def _forward_lookup(ctx, owner_name, rrtype="ANY", bailiwick=None,
@@ -525,7 +528,11 @@ def _forward_lookup(ctx, owner_name, rrtype="ANY", bailiwick=None,
 @click.option("-j", "--json", "_json", is_flag=True,
               help="Output in JSON format.")
 @click.option("-s", "--sort", "sort_by",
-              help="Sort JSON results by this field.")
+              help="Sort JSON results by this field.",
+              type=click.Choice(["count", "time_first", "time_last",
+                                 "zone_time_first", "zone_time_last",
+                                 "rrname", "rrtype", "rdata"])
+              )
 @click.option("-r", "--reverse", is_flag=True, help="Reverse the sorting.")
 @click.pass_context
 def _inverse_lookup(ctx, query_type, value, rrtype="ANY",

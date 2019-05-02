@@ -2,7 +2,7 @@
 dnsdb-python
 ============
 
-A full-featured unofficial Python client and CLI for Farsight's DNSDB passive
+A full-featured unofficial Python client and CLI for Farsight Security's DNSDB passive
 DNS service.
 
 ::
@@ -28,20 +28,26 @@ DNS service.
       Forward DNS lookup.
 
     Options:
-      -t, --rrtype TEXT         Filter results by DNS resource record type.
-                                [default: ANY]
-      -b, --bailiwick TEXT      Filter results by DNS bailiwick.
-      --first-seen-before TEXT  Only show results first seen before this date.
-      --first-seen-after TEXT   Only show results first seen after this date.
-      --first-seen-before TEXT  Only show results first seen before this date.
-      --first-seen-after TEXT   Only show results first seen after this date.
-      --last-seen-before TEXT   Only show results last seen before this date.
-      --last-seen-after TEXT    Only show results last seen after this date.
-      -l, --limit INTEGER       Limit the number of results to this number.
-      -j, --json                Output in JSON format.
-      -s, --sort TEXT           Sort JSON results by this field.
-      -r, --reverse             Reverse the sorting.
-      --help                    Show this message and exit.
+      -t, --rrtype TEXT               Filter results by DNS resource record type.
+                                      [default: ANY]
+      -b, --bailiwick TEXT            Filter results by DNS bailiwick.
+      --first-seen-before TEXT        Only show results first seen before this
+                                      date.
+      --first-seen-after TEXT         Only show results first seen after this
+                                      date.
+      --first-seen-before TEXT        Only show results first seen before this
+                                      date.
+      --first-seen-after TEXT         Only show results first seen after this
+                                      date.
+      --last-seen-before TEXT         Only show results last seen before this
+                                      date.
+      --last-seen-after TEXT          Only show results last seen after this date.
+      -l, --limit INTEGER             Limit the number of results to this number.
+      -j, --json                      Output in JSON format.
+      -s, --sort [count|time_first|time_last|zone_time_first|zone_time_last|rrname|rrtype|bailiwick|rdata]
+                                      Sort JSON results by this field.
+      -r, --reverse                   Reverse the sorting.
+      --help                          Show this message and exit.
 
 ::
 
@@ -50,19 +56,25 @@ DNS service.
       Inverse DNS lookup.
 
     Options:
-      -t, --rrtype TEXT         Filter results by DNS resource record type.
-                                [default: ANY]
-      --first-seen-before TEXT  Only show results first seen before this date.
-      --first-seen-after TEXT   Only show results first seen after this date.
-      --first-seen-before TEXT  Only show results first seen before this date.
-      --first-seen-after TEXT   Only show results first seen after this date.
-      --last-seen-before TEXT   Only show results last seen before this date.
-      --last-seen-after TEXT    Only show results last seen after this date.
-      -l, --limit INTEGER       Limit the number of results to this number.
-      -j, --json                Output in JSON format.
-      -s, --sort TEXT           Sort JSON results by this field.
-      -r, --reverse             Reverse the sorting.
-      --help                    Show this message and exit.
+      -t, --rrtype TEXT               Filter results by DNS resource record type.
+                                      [default: ANY]
+      --first-seen-before TEXT        Only show results first seen before this
+                                      date.
+      --first-seen-after TEXT         Only show results first seen after this
+                                      date.
+      --first-seen-before TEXT        Only show results first seen before this
+                                      date.
+      --first-seen-after TEXT         Only show results first seen after this
+                                      date.
+      --last-seen-before TEXT         Only show results last seen before this
+                                      date.
+      --last-seen-after TEXT          Only show results last seen after this date.
+      -l, --limit INTEGER             Limit the number of results to this number.
+      -j, --json                      Output in JSON format.
+      -s, --sort [count|time_first|time_last|zone_time_first|zone_time_last|rrname|rrtype|rdata]
+                                      Sort JSON results by this field.
+      -r, --reverse                   Reverse the sorting.
+      --help                          Show this message and exit.
 
 Features
 --------
@@ -80,8 +92,8 @@ Features
 Installation
 ------------
 
-:: bash
+.. code-block:: bash
 
-    sudo -H pip3 install -U dnsdb-python
+    pip3 install -U dnsdb-python
 
 Store your API key as an environment variable named ``DNSDB_KEY``
