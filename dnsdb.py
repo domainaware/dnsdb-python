@@ -29,7 +29,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License."""
 
-__version__ = "1.0.0"
+__version__ = "1.0.1"
 
 
 def _epoch_to_datetime(epoch_seconds):
@@ -244,6 +244,7 @@ class DNSDBAPI(object):
         if _json:
             headers.update({"Accept": "application/json"})
         response = self._session.get(endpoint, headers=headers, params=_params)
+        logging.info("Querying {0}".format(response.url))
         if response.status_code == 200:
             if _json:
                 return _load_json(response.text, sort_by=sort_by,
@@ -430,12 +431,12 @@ class _CLIConfig(object):
         else:
             logging.basicConfig(level=logging.WARNING,
                                 format="%(levelname)s: %(message)s")
-            try:
-                self.client = DNSDBAPI()
-            except InvalidAPIKey:
-                logging.error("DNSDB_KEY environment variable missing or "
-                              "invalid.")
-                exit(-1)
+        try:
+            self.client = DNSDBAPI()
+        except InvalidAPIKey:
+            logging.error("DNSDB_KEY environment variable missing or "
+                          "invalid.")
+            exit(-1)
 
 
 @click.group()
