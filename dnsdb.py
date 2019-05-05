@@ -8,7 +8,12 @@ from __future__ import print_function, unicode_literals
 import os
 import logging
 import json
+import locale
+import copy
 from datetime import datetime
+from collections import OrderedDict
+from io import StringIO
+from csv import DictWriter
 
 import dateparser
 import click
@@ -29,7 +34,9 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License."""
 
-__version__ = "1.0.1"
+__version__ = "1.1.0"
+
+locale.setlocale(locale.LC_ALL, '')
 
 
 def _epoch_to_datetime(epoch_seconds):
@@ -154,22 +161,33 @@ def _load_json(dnsdb_json_string, sort_by=None, reverse=False):
         reverse (bool): Reverse the sorting
 
     Returns:
-        list: A Python list of result of result dictionaries, with
-        human-readable ISO 8601 timestamps
+        list: A Python list of result of result dictionaries
     """
     results = []
     for line in dnsdb_json_string.split("\n"):
         if len(line) > 1:
             result = json.loads(line, encoding="uft-8")
-            if "zone_time_first" in result:
-                result["time_first"] = result["zone_time_first"]
-                result["time_last"] = result["zone_time_last"]
-                del result["zone_time_first"]
-                del result["zone_time_last"]
-                result["source"] = "zone"
-            else:
-                result["source"] = "sensor"
-            results.append(result)
+            new_result = OrderedDict()
+            if "bailiwick" in result:
+                new_result["bailiwick"] = result["bailiwick"]
+            if "count" in result:
+                new_result["count"] = result["count"]
+            if "time_first" in result:
+                new_result["first_seen"] = result["time_first"]
+                new_result["last_seen"] = result["time_last"]
+                new_result["source"] = "sensor"
+            elif "zone_first" in result:
+                new_result["first_seen"] = result["zone_first_seen"]
+                new_result["last_seen"] = result["zone_last_seen"]
+                new_result["source"] = "zone"
+            if "rrname" in result:
+                new_result["rrname"] = result["rrname"]
+            if "rrtype" in result:
+                new_result["rrtype"] = result["rrtype"]
+            if "rdata" in result:
+                new_result["rdata"] = result["rdata"]
+
+            results.append(new_result)
 
     if sort_by is not None:
         try:
@@ -180,14 +198,119 @@ def _load_json(dnsdb_json_string, sort_by=None, reverse=False):
             raise KeyError("Unable to sort by {0}. "
                            "Field does not exist".format(sort_by))
     for result in results:
-        if "time_first" in result:
-            result["time_first"] = _timestamp_to_iso8601(
-                result["time_first"])
-        if "time_last" in result:
-            result["time_last"] = _timestamp_to_iso8601(
-                result["time_last"])
+        if "first_seen" in result:
+            result["first_seen"] = _epoch_to_datetime(
+                result["first_seen"])
+        if "last_seen" in result:
+            result["last_seen"] = _epoch_to_datetime(
+                result["last_seen"])
 
     return results
+
+
+def dnsdb_results_to_json(results):
+    """
+    Converts DNSDB results to pretty JSON
+
+    Args:
+        results (dict): DNSDB results
+
+    Returns:
+        str: Results as a JSON string
+    """
+    results = copy.deepcopy(results)
+    for result in results:
+        if "first_seen" in result:
+            result["first_seen"] = _timestamp_to_iso8601(result["first_seen"])
+        if "last_seen" in result:
+            result["last_seen"] = _timestamp_to_iso8601(result["last_seen"])
+
+    return json.dumps(results, indent=2, ensure_ascii=False)
+
+
+def _dnsdb_result_to_text(result):
+    """
+    Converts a single DNSDB result to text in DNS master File format
+
+    Args:
+        result (dict): DNSDB result
+
+    Returns:
+        str: DNS master file content
+    """
+    s = ""
+    if 'bailiwick' in result:
+        s += ';; bailiwick:  {0}\n'.format(result["bailiwick"])
+
+    if 'count' in result:
+        s += ';; count:      {0}\n'.format(locale.format_string(
+            "%d",
+            result["count"],
+            True
+        ))
+    if "source" in result:
+        s += ";; source:     {0}\n".format(result["source"])
+
+    if 'first_seen' in result:
+        s += ';; first seen: {0}\n'.format(_timestamp_to_iso8601(
+            result["first_seen"]
+        ))
+    if 'last_seen' in result:
+        s += ';; last seen:  {0}\n'.format(_timestamp_to_iso8601(
+            result["last_seen"]
+        ))
+
+    if 'rdata' in result:
+        for rdata in result['rdata']:
+            s += '{0} IN {1} {2}\n'.format(result['rrname'],
+                                           result['rrtype'],
+                                           rdata)
+
+    return s
+
+
+def dnsdb_results_to_text(results):
+    """
+    Converts DNSDB results to text in DNS master File format
+
+    Args:
+        results (dict): DNSDB results
+
+    Returns:
+        str: DNS master file content
+    """
+    results = copy.deepcopy(results)
+    return "\n".join(list(map(lambda x: _dnsdb_result_to_text(x), results)))
+
+
+def dnsdb_results_to_csv(results):
+    """
+    Converts DNSDB results to CSV format
+
+    Args:
+        results (dict): DNSDB results
+
+    Returns:
+        str: Results in CSV format
+    """
+    results = copy.deepcopy(results)
+    file = StringIO()
+    fields = ["bailiwick", "count", "first_seen", "last_seen", "source",
+              "rrname", "rrtype", "rdata"]
+    csv = DictWriter(file, fieldnames=fields)
+    csv.writeheader()
+    for result in results:
+        if "first_seen" in result:
+            result["first_seen"] = _timestamp_to_iso8601(result["first_seen"])
+        if "last_seen" in results:
+            result["last_seen"] = _timestamp_to_iso8601(result["last_seen"])
+        if "rdata" in result:
+            result["rdata"] = "|".join(result["rdata"])
+        csv.writerow(result)
+
+    file.seek(0)
+
+    return file.read()
 
 
 class DNSDBAPI(object):
@@ -202,8 +325,8 @@ class DNSDBAPI(object):
         Configures the API client
 
         Args:
-            api_key (str): WhoisXMLAPI API key; overridden by the
-            ``WHOIS_KEY`` environment variable
+            api_key (str): DNSDB API key; overridden by the
+            ``DNSDB_KEY`` environment variable
             client_name (str): The client's name
             client_version (str): The client's version
             url_root (str): The root URL of the DNSDB API
@@ -214,8 +337,11 @@ class DNSDBAPI(object):
             url_root = os.environ["DNSDB_ROOT"]
         if api_key is None:
             raise InvalidAPIKey(
-                " An API key must provided as the api_key parameter, or the "
+                "An API key must provided as the api_key parameter, or the "
                 "DNSDB_KEY environment variable.")
+        if api_key.startswith("dce-"):
+            logging.warning("DNSDB Community Edition (DCE) key detected. Time "
+                            "filtering and number of results will be limited.")
         if client_name is None or client_version is None:
             self.client_name = "dnsdb-python"
             self.client_version = __version__
@@ -230,7 +356,7 @@ class DNSDBAPI(object):
         self._session = session()
         self._session.headers.update(default_headers)
 
-    def _get(self, endpoint, params=None, _json=False,
+    def _get(self, endpoint, params=None, _json=True,
              sort_by=None, reverse=False):
         default_params = dict(swclient=self.client_name,
                               version=self.client_version)
@@ -275,7 +401,7 @@ class DNSDBAPI(object):
             raise DNSDBAPIError(error_msg)
 
     def get_quotas(self):
-        quotas = self._get("/lookup/rate_limit")
+        quotas = self._get("/lookup/rate_limit", _json=False)
         quotas = json.loads(quotas)["rate"]
         if "limit" in quotas:
             if quotas["limit"] == "unlimited":
@@ -299,8 +425,7 @@ class DNSDBAPI(object):
     def forward_lookup(self, owner_name, rrtype="ANY", bailiwick=None,
                        first_seen_before=None, first_seen_after=None,
                        last_seen_before=None, last_seen_after=None,
-                       limit=None, sort_by=None, reverse=False,
-                       return_text=False):
+                       limit=None, sort_by=None, reverse=False):
         """
         Performs a forward DNS lookup
 
@@ -315,7 +440,6 @@ class DNSDBAPI(object):
             limit (int): The maximum number of results to return
             sort_by: An optional field to sort by
             reverse (bool): Reverse the sorting
-            return_text (bool): Return results in DNS master file format
 
         Returns:
             Results as a Python list, or as text in DNS master file format
@@ -324,7 +448,6 @@ class DNSDBAPI(object):
         if rrtype is not None:
             rrtype = rrtype.upper()
         params = dict()
-        _json = return_text is False
         if limit is not None:
             params["limit"] = limit
         if bailiwick is not None and rrtype is None:
@@ -337,33 +460,29 @@ class DNSDBAPI(object):
         if first_seen_before is not None:
             first_seen_before = _datetime_to_timestamp(
                 dateparser.parse(first_seen_before))
-            params["time_first_before"] = first_seen_before
+            params["first_seen_before"] = first_seen_before
         if first_seen_after is not None:
             first_seen_after = _datetime_to_timestamp(
                 dateparser.parse(first_seen_after))
-            params["time_first_after"] = first_seen_after
+            params["first_seen_after"] = first_seen_after
         if last_seen_before is not None:
             last_seen_before = _datetime_to_timestamp(
                 dateparser.parse(last_seen_before))
-            params["time_last_before"] = last_seen_before
+            params["last_seen_before"] = last_seen_before
         if last_seen_after is not None:
             last_seen_after = _datetime_to_timestamp(
                 dateparser.parse(last_seen_after))
-            params["time_last_after"] = last_seen_after
+            params["last_seen_after"] = last_seen_after
         try:
-            return self._get(endpoint, params=params, _json=_json,
+            return self._get(endpoint, params=params,
                              sort_by=sort_by, reverse=reverse)
         except _NoRecordsFound:
-            if return_text:
-                return ""
-            else:
-                return []
+            return []
 
     def inverse_lookup(self, _type, value, rrtype=None,
                        first_seen_before=None, first_seen_after=None,
                        last_seen_before=None, last_seen_after=None,
-                       limit=None, sort_by=None, reverse=None,
-                       return_text=False):
+                       limit=None, sort_by=None, reverse=None):
         """
         Performs a inverse DNS lookup
 
@@ -378,7 +497,6 @@ class DNSDBAPI(object):
             limit (int): The maximum number of results to return
             sort_by: An optional field to sort by
             reverse (bool): Reverse the sorting
-            return_text (bool): Return results in DNS master file format
 
         Returns:
             Results as a Python list, or as text in DNS master file format
@@ -387,7 +505,6 @@ class DNSDBAPI(object):
         if rrtype is not None:
             rrtype = rrtype.upper()
         params = dict()
-        _json = return_text is False
         if limit is not None:
             params["limit"] = limit
         _type = _type.lower()
@@ -399,28 +516,25 @@ class DNSDBAPI(object):
         if first_seen_before is not None:
             first_seen_before = _datetime_to_timestamp(
                 dateparser.parse(first_seen_before))
-            params["time_first_before"] = first_seen_before
+            params["first_seen_before"] = first_seen_before
         if first_seen_after is not None:
             first_seen_after = _datetime_to_timestamp(
                 dateparser.parse(first_seen_after))
-            params["time_first_after"] = first_seen_after
+            params["first_seen_after"] = first_seen_after
         if last_seen_before is not None:
             last_seen_before = _datetime_to_timestamp(
                 dateparser.parse(last_seen_before))
-            params["time_last_before"] = last_seen_before
+            params["last_seen_before"] = last_seen_before
         if last_seen_after is not None:
             last_seen_after = _datetime_to_timestamp(
                 dateparser.parse(last_seen_after))
-            params["time_last_after"] = last_seen_after
+            params["last_seen_after"] = last_seen_after
 
         try:
-            return self._get(endpoint, params=params, _json=_json,
+            return self._get(endpoint, params=params,
                              sort_by=sort_by, reverse=reverse)
         except _NoRecordsFound:
-            if return_text:
-                return ""
-            else:
-                return []
+            return []
 
 
 class _CLIConfig(object):
@@ -475,20 +589,29 @@ def _get_quotas(ctx):
               help="Only show results last seen after this date.")
 @click.option("-l", "--limit", type=int,
               help="Limit the number of results to this number.")
-@click.option("-j", "--json", "_json", is_flag=True,
-              help="Output in JSON format.")
 @click.option("-s", "--sort", "sort_by",
               help="Sort JSON results by this field.",
-              type=click.Choice(["count", "time_first", "time_last",
+              type=click.Choice(["count", "first_seen", "last_seen",
                                  "rrname", "rrtype", "bailiwick", "rdata",
-                                 "source"])
+                                 "source"]),
+
               )
 @click.option("-r", "--reverse", is_flag=True, help="Reverse the sorting.")
+@click.option("-f", "--format", "_format",
+              type=click.Choice(["text", "json", "csv"]),
+              default="text", show_default=True,
+              help="Set the screen output format.")
+@click.option("--output", "-o", "output_paths",
+              type=click.Path(dir_okay=False, writable=True),
+              multiple=True,
+              help="One or more output file paths that end in .csv, .json, "
+                   " or .txt (suppresses screen output).")
 @click.pass_context
 def _forward_lookup(ctx, owner_name, rrtype="ANY", bailiwick=None,
                     first_seen_before=None, first_seen_after=None,
                     last_seen_before=None, last_seen_after=None,
-                    limit=None, _json=False, sort_by=None, reverse=False):
+                    limit=None, sort_by=None, reverse=False,
+                    _format="text", output_paths=None):
     """Forward DNS lookup."""
     try:
         results = ctx.obj.client.forward_lookup(
@@ -499,14 +622,26 @@ def _forward_lookup(ctx, owner_name, rrtype="ANY", bailiwick=None,
             last_seen_before=last_seen_before,
             last_seen_after=last_seen_after,
             limit=limit,
-            return_text=_json is False,
             sort_by=sort_by,
             reverse=reverse
         )
-        if _json:
-            print(json.dumps(results, indent=2, ensure_ascii=False))
+        if len(output_paths) == 0:
+            if _format == "json":
+                print(dnsdb_results_to_json(results.copy()))
+            elif _format == "csv":
+                print(dnsdb_results_to_csv(results.copy()))
+            else:
+                print(dnsdb_results_to_text(results.copy()))
         else:
-            print(results)
+            for output_path in output_paths:
+                with open(output_path, "w",
+                          encoding="utf-8", newline="\n") as output_file:
+                    if output_path.lower().endswith(".json"):
+                        output_file.write(dnsdb_results_to_json(results))
+                    elif output_path.lower().endswith(".csv"):
+                        output_file.write(dnsdb_results_to_csv(results))
+                    else:
+                        output_file.write(dnsdb_results_to_text(results))
     except Exception as e:
         logging.error(e.__str__())
         exit(-1)
@@ -532,20 +667,28 @@ def _forward_lookup(ctx, owner_name, rrtype="ANY", bailiwick=None,
               help="Only show results last seen after this date.")
 @click.option("-l", "--limit", type=int,
               help="Limit the number of results to this number.")
-@click.option("-j", "--json", "_json", is_flag=True,
-              help="Output in JSON format.")
 @click.option("-s", "--sort", "sort_by",
               help="Sort JSON results by this field.",
-              type=click.Choice(["count", "time_first", "time_last",
+              type=click.Choice(["count", "first_seen", "last_seen",
                                  "rrname", "rrtype", "bailiwick", "rdata",
                                  "source"])
               )
 @click.option("-r", "--reverse", is_flag=True, help="Reverse the sorting.")
+@click.option("-f", "--format", "_format",
+              type=click.Choice(["text", "json", "csv"]),
+              default="text", show_default=True,
+              help="Set the screen output format.")
+@click.option("--output", "-o", "output_paths",
+              type=click.Path(dir_okay=False, writable=True),
+              multiple=True,
+              help="One or more output file paths that end in .csv, .json, "
+                   " or .txt (suppresses screen output).")
 @click.pass_context
 def _inverse_lookup(ctx, query_type, value, rrtype="ANY",
                     first_seen_before=None, first_seen_after=None,
                     last_seen_before=None, last_seen_after=None,
-                    limit=None, _json=False, sort_by=None, reverse=False):
+                    limit=None, sort_by=None, reverse=False,
+                    _format="text", output_paths=None):
     """Inverse DNS lookup."""
     try:
         results = ctx.obj.client.inverse_lookup(
@@ -555,14 +698,26 @@ def _inverse_lookup(ctx, query_type, value, rrtype="ANY",
             last_seen_before=last_seen_before,
             last_seen_after=last_seen_after,
             limit=limit,
-            return_text=_json is False,
             sort_by=sort_by,
             reverse=reverse
         )
-        if _json:
-            print(json.dumps(results, indent=2, ensure_ascii=False))
+        if output_paths is None:
+            if _format == "json":
+                print(dnsdb_results_to_json(results))
+            elif _format == "csv":
+                print(dnsdb_results_to_csv(results))
+            else:
+                print(dnsdb_results_to_text(results))
         else:
-            print(results)
+            for output_path in output_paths:
+                with open(output_path, "w",
+                          encoding="utf-8", newline="\n") as output_file:
+                    if output_path.lower().endswith(".json"):
+                        output_file.write(dnsdb_results_to_json(results))
+                    elif output_path.lower().endswith(".csv"):
+                        output_file.write(dnsdb_results_to_csv(results))
+                    else:
+                        output_file.write(dnsdb_results_to_text(results))
     except Exception as e:
         logging.error(e.__str__())
         exit(-1)
