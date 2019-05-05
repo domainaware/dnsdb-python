@@ -52,6 +52,7 @@ A full-featured unofficial Python client and CLI for
                                       .csv, .json,  or .txt (suppresses screen
                                       output).
       --help                          Show this message and exit.
+
 ::
 
     Usage: dnsdb forward [OPTIONS] OWNER_NAME
@@ -92,12 +93,13 @@ Features
 - Full CLI
 - Python 2 and 3 support
 - Parses multiple human date formats for time filtering
-- Output in text (DNS master file format)
-- JSON output
-   - Outputs results as a pretty printed JSON list
-   - Sort output by any JSON field
-   - Automatically converts UNIX epoch timestamps to ISO 8601 timestamps
-   - Normalize timestamp fields for sensor and zone file observations
+- Automatically converts UNIX epoch timestamps to ISO 8601 timestamps
+- Normalize timestamp fields for sensor and zone file observations
+- Multiple output formats
+  - Text (DNS master file format)
+  - CSV
+  - JSON
+
 
 Installation
 ------------
