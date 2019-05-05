@@ -55,14 +55,13 @@ A full-featured unofficial Python client and CLI for
 
 ::
 
-    Usage: dnsdb forward [OPTIONS] OWNER_NAME
+    Usage: dnsdb inverse [OPTIONS] [name|ip|raw] VALUE
 
-      Forward DNS lookup.
+      Inverse DNS lookup.
 
     Options:
       -t, --rrtype TEXT               Filter results by DNS resource record type.
                                       [default: ANY]
-      -b, --bailiwick TEXT            Filter results by DNS bailiwick.
       --first-seen-before TEXT        Only show results first seen before this
                                       date.
       --first-seen-after TEXT         Only show results first seen after this
@@ -75,7 +74,7 @@ A full-featured unofficial Python client and CLI for
                                       date.
       --last-seen-after TEXT          Only show results last seen after this date.
       -l, --limit INTEGER             Limit the number of results to this number.
-      -s, --sort [count|time_first|time_last|rrname|rrtype|bailiwick|rdata|source]
+      -s, --sort [count|first_seen|last_seen|rrname|rrtype|bailiwick|rdata|source]
                                       Sort JSON results by this field.
       -r, --reverse                   Reverse the sorting.
       -f, --format [text|json|csv]    Set the screen output format.  [default:
@@ -95,6 +94,7 @@ Features
 - Parses multiple human date formats for time filtering
 - Automatically converts UNIX epoch timestamps to ISO 8601 timestamps
 - Normalize timestamp fields for sensor and zone file observations
+- Sort by any field
 - Multiple output formats
 
   - Text (DNS master file format)
@@ -119,7 +119,7 @@ To install the latest development version, run
 
 Store your API key as an environment variable named ``DNSDB_KEY``.
 
-If you are using a self-hosted instance of DNSDB, store the URL toot as an
+If you are using a self-hosted instance of DNSDB, store the URL root as an
 environment variable named ``DNSDB_ROOT``.
 
 See also
