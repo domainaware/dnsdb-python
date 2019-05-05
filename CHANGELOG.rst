@@ -2,6 +2,7 @@
 -----
 
 - API and CLI refactoring
+- Add CSV output support
 - Add warning when a DNSDB Community Edition (DCE) key is detected
 - Bug fixes
 
