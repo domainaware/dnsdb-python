@@ -96,6 +96,7 @@ Features
 - Automatically converts UNIX epoch timestamps to ISO 8601 timestamps
 - Normalize timestamp fields for sensor and zone file observations
 - Multiple output formats
+  
   - Text (DNS master file format)
   - CSV
   - JSON
