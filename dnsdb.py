@@ -34,7 +34,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License."""
 
-__version__ = "1.1.1"
+__version__ = "1.1.12
 
 locale.setlocale(locale.LC_ALL, '')
 
@@ -66,7 +66,7 @@ def _timestamp_to_iso8601(dt):
 
     Returns:
 
-    str: a timestamp formatted ``YYYY-MM-DD HH:MM:SS``
+    str: a timestamp in ISO 5601 format
     """
 
     if type(dt) == int:
@@ -579,10 +579,6 @@ def _get_quotas(ctx):
               help="Only show results first seen before this date.")
 @click.option("--first-seen-after",
               help="Only show results first seen after this date.")
-@click.option("--first-seen-before",
-              help="Only show results first seen before this date.")
-@click.option("--first-seen-after",
-              help="Only show results first seen after this date.")
 @click.option("--last-seen-before",
               help="Only show results last seen before this date.")
 @click.option("--last-seen-after",
@@ -653,10 +649,6 @@ def _forward_lookup(ctx, owner_name, rrtype="ANY", bailiwick=None,
 @click.option("-t", "--rrtype", help="Filter results by DNS resource record "
                                      "type.",
               default="ANY", show_default=True)
-@click.option("--first-seen-before",
-              help="Only show results first seen before this date.")
-@click.option("--first-seen-after",
-              help="Only show results first seen after this date.")
 @click.option("--first-seen-before",
               help="Only show results first seen before this date.")
 @click.option("--first-seen-after",

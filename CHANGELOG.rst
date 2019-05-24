@@ -1,3 +1,8 @@
+1.1.2
+-----
+
+- Remove duplicate CLI options
+
 1.1.1
 -----
 
