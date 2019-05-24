@@ -1,3 +1,8 @@
+1.1.3
+-----
+
+- Remove ``from __future__ import unicode_literals``
+
 1.1.2
 -----
 

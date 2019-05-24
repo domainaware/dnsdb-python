@@ -15,7 +15,7 @@ from setuptools import setup
 from codecs import open
 from os import path
 
-__version__ = "1.1.2"
+__version__ = "1.1.3"
 desc = "An unofficial Farsight Security DNSDB client"
 
 here = path.abspath(path.dirname(__file__))
