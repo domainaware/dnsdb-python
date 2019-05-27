@@ -13,6 +13,14 @@ Features
 - Full CLI
 - Python 2 and 3 support
 - Parses multiple human date formats for time filtering
+
+  - 7 days
+  - 7d
+  - 2019-05-20
+  - 1 month
+  - 1m
+
+
 - Automatically converts UNIX epoch timestamps to ISO 8601 timestamps
 - Normalize timestamp fields for sensor and zone file observations
 - Sort by any field

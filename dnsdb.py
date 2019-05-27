@@ -34,7 +34,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License."""
 
-__version__ = "1.2.0"
+__version__ = "1.2.1"
 
 locale.setlocale(locale.LC_ALL, '')
 
@@ -307,10 +307,11 @@ def dnsdb_results_to_csv(results):
     for result in results:
         if "first_seen" in result:
             result["first_seen"] = _timestamp_to_iso8601(result["first_seen"])
-        if "last_seen" in results:
+        if "last_seen" in result:
             result["last_seen"] = _timestamp_to_iso8601(result["last_seen"])
         if "rdata" in result:
-            result["rdata"] = "|".join(result["rdata"])
+            if type(result["rdata"]) == list:
+                result["rdata"] = "|".join(result["rdata"])
         csv.writerow(result)
 
     file.seek(0)
