@@ -34,7 +34,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License."""
 
-__version__ = "1.1.3"
+__version__ = "1.1.4"
 
 locale.setlocale(locale.LC_ALL, '')
 
@@ -460,19 +460,19 @@ class DNSDBAPI(object):
         if first_seen_before is not None:
             first_seen_before = _datetime_to_timestamp(
                 dateparser.parse(first_seen_before))
-            params["first_seen_before"] = first_seen_before
+            params["time_first_before"] = first_seen_before
         if first_seen_after is not None:
             first_seen_after = _datetime_to_timestamp(
                 dateparser.parse(first_seen_after))
-            params["first_seen_after"] = first_seen_after
+            params["time_first_after"] = first_seen_after
         if last_seen_before is not None:
             last_seen_before = _datetime_to_timestamp(
                 dateparser.parse(last_seen_before))
-            params["last_seen_before"] = last_seen_before
+            params["time_last_before"] = last_seen_before
         if last_seen_after is not None:
             last_seen_after = _datetime_to_timestamp(
                 dateparser.parse(last_seen_after))
-            params["last_seen_after"] = last_seen_after
+            params["time_last_after"] = last_seen_after
         try:
             return self._get(endpoint, params=params,
                              sort_by=sort_by, reverse=reverse)
@@ -516,19 +516,19 @@ class DNSDBAPI(object):
         if first_seen_before is not None:
             first_seen_before = _datetime_to_timestamp(
                 dateparser.parse(first_seen_before))
-            params["first_seen_before"] = first_seen_before
+            params["time_first_before"] = first_seen_before
         if first_seen_after is not None:
             first_seen_after = _datetime_to_timestamp(
                 dateparser.parse(first_seen_after))
-            params["first_seen_after"] = first_seen_after
+            params["time_first_after"] = first_seen_after
         if last_seen_before is not None:
             last_seen_before = _datetime_to_timestamp(
                 dateparser.parse(last_seen_before))
-            params["last_seen_before"] = last_seen_before
+            params["time_last_before"] = last_seen_before
         if last_seen_after is not None:
             last_seen_after = _datetime_to_timestamp(
                 dateparser.parse(last_seen_after))
-            params["last_seen_after"] = last_seen_after
+            params["time_last_after"] = last_seen_after
 
         try:
             return self._get(endpoint, params=params,
