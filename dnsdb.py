@@ -34,7 +34,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License."""
 
-__version__ = "1.1.4"
+__version__ = "1.2.0"
 
 locale.setlocale(locale.LC_ALL, '')
 
@@ -261,10 +261,15 @@ def _dnsdb_result_to_text(result):
         ))
 
     if 'rdata' in result:
-        for rdata in result['rdata']:
+        if type(result["rdata"]) == list:
+            for rdata in result['rdata']:
+                s += '{0} IN {1} {2}\n'.format(result['rrname'],
+                                               result['rrtype'],
+                                               rdata)
+        else:
             s += '{0} IN {1} {2}\n'.format(result['rrname'],
                                            result['rrtype'],
-                                           rdata)
+                                           result["rdata"])
 
     return s
 
@@ -693,7 +698,7 @@ def _inverse_lookup(ctx, query_type, value, rrtype="ANY",
             sort_by=sort_by,
             reverse=reverse
         )
-        if output_paths is None:
+        if len(output_paths) == 0:
             if _format == "json":
                 print(dnsdb_results_to_json(results))
             elif _format == "csv":
