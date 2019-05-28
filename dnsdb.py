@@ -12,8 +12,12 @@ import locale
 import copy
 from datetime import datetime
 from collections import OrderedDict
-from io import StringIO
 from csv import DictWriter
+try:
+    # Python 2 support
+    from cStringIO import StringIO
+except ImportError:
+    from io import StringIO
 
 import dateparser
 import click
@@ -193,7 +197,7 @@ def _load_json(dnsdb_json_string, sort_by=None, reverse=False):
         try:
             results = list(sorted(
                 results,
-                key=lambda x: x[sort_by], reverse=reverse)).copy()
+                key=lambda x: x[sort_by], reverse=reverse))
         except KeyError:
             raise KeyError("Unable to sort by {0}. "
                            "Field does not exist".format(sort_by))
@@ -299,10 +303,10 @@ def dnsdb_results_to_csv(results):
         str: Results in CSV format
     """
     results = copy.deepcopy(results)
-    file = StringIO()
+    csv_file = StringIO()
     fields = ["bailiwick", "count", "first_seen", "last_seen", "source",
               "rrname", "rrtype", "rdata"]
-    csv = DictWriter(file, fieldnames=fields)
+    csv = DictWriter(csv_file, fieldnames=fields)
     csv.writeheader()
     for result in results:
         if "first_seen" in result:
@@ -314,9 +318,9 @@ def dnsdb_results_to_csv(results):
                 result["rdata"] = "|".join(result["rdata"])
         csv.writerow(result)
 
-    file.seek(0)
+    csv_file.seek(0)
 
-    return file.read()
+    return csv_file.read()
 
 
 class DNSDBAPI(object):
@@ -366,7 +370,7 @@ class DNSDBAPI(object):
              sort_by=None, reverse=False):
         default_params = dict(swclient=self.client_name,
                               version=self.client_version)
-        _params = default_params.copy()
+        _params = copy.deepcopy(default_params)
         if params:
             _params.update(params)
         endpoint = "{0}/{1}".format(self._root, endpoint.strip("/"))
@@ -629,15 +633,14 @@ def _forward_lookup(ctx, owner_name, rrtype="ANY", bailiwick=None,
         )
         if len(output_paths) == 0:
             if _format == "json":
-                print(dnsdb_results_to_json(results.copy()))
+                print(dnsdb_results_to_json(results))
             elif _format == "csv":
-                print(dnsdb_results_to_csv(results.copy()))
+                print(dnsdb_results_to_csv(results))
             else:
-                print(dnsdb_results_to_text(results.copy()))
+                print(dnsdb_results_to_text(results))
         else:
             for output_path in output_paths:
-                with open(output_path, "w",
-                          encoding="utf-8", newline="\n") as output_file:
+                with open(output_path, "w") as output_file:
                     if output_path.lower().endswith(".json"):
                         output_file.write(dnsdb_results_to_json(results))
                     elif output_path.lower().endswith(".csv"):

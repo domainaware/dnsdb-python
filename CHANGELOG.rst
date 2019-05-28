@@ -1,7 +1,8 @@
 1.2.1
 -----
 
-- CSV output fixes
+- Fix CSV output
+- Fix Python 2 support
 
 1.2.0
 -----
