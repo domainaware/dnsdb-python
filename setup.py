@@ -37,7 +37,7 @@ setup(
     long_description=long_description,
 
     # The project's main homepage.
-    url='https://domainaware.github.io/dnsdb-python',
+    url='https://domainaware.github.io/dnsdb-python/',
 
     # Author details
     author='Sean Whalen',
