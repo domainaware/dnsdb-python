@@ -1,0 +1,497 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>dnsdb-python &mdash; dnsdb-python 1.2. documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="#" class="icon icon-home"> dnsdb-python
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.2.
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <!-- Local TOC -->
+              <div class="local-toc"><ul>
+<li><a class="reference internal" href="#">dnsdb-python</a><ul>
+<li><a class="reference internal" href="#features">Features</a></li>
+<li><a class="reference internal" href="#cli">CLI</a></li>
+<li><a class="reference internal" href="#installation">Installation</a></li>
+<li><a class="reference internal" href="#module-dnsdb">Python API</a></li>
+<li><a class="reference internal" href="#see-also">See also</a></li>
+</ul>
+</li>
+</ul>
+</div>
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">dnsdb-python</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="#">Docs</a> &raquo;</li>
+        
+      <li>dnsdb-python</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="dnsdb-python">
+<h1>dnsdb-python<a class="headerlink" href="#dnsdb-python" title="Permalink to this headline">¶</a></h1>
+<p>A full-featured unofficial Python client and CLI for
+<a class="reference external" href="https://www.farsightsecurity.com/solutions/dnsdb/">Farsight Security’s DNSDB</a> passive DNS service.</p>
+<div class="section" id="features">
+<h2>Features<a class="headerlink" href="#features" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>Easy to use Python class covers all DNSDB API endpoints and options</p></li>
+<li><p>Supports hosted and self-hosted instances of DNSDB</p></li>
+<li><p>Full CLI</p></li>
+<li><p>Python 2 and 3 support</p></li>
+<li><p>Parses multiple human date formats for time filtering</p>
+<ul>
+<li><p>7 days</p></li>
+<li><p>7d</p></li>
+<li><p>2019-05-20</p></li>
+<li><p>1 month</p></li>
+<li><p>1m</p></li>
+</ul>
+</li>
+<li><p>Automatically converts UNIX epoch timestamps to ISO 8601 timestamps</p></li>
+<li><p>Normalize timestamp fields for sensor and zone file observations</p></li>
+<li><p>Sort by any field</p></li>
+<li><p>Multiple output formats</p>
+<ul>
+<li><p>Text (DNS master file format)</p></li>
+<li><p>CSV</p></li>
+<li><p>JSON</p></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="cli">
+<h2>CLI<a class="headerlink" href="#cli" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Usage</span><span class="p">:</span> <span class="n">dnsdb</span> <span class="p">[</span><span class="n">OPTIONS</span><span class="p">]</span> <span class="n">COMMAND</span> <span class="p">[</span><span class="n">ARGS</span><span class="p">]</span><span class="o">...</span>
+
+  <span class="n">An</span> <span class="n">unofficial</span> <span class="n">Farsight</span> <span class="n">Security</span> <span class="n">DNSDB</span> <span class="n">client</span>
+
+<span class="n">Options</span><span class="p">:</span>
+  <span class="o">--</span><span class="n">version</span>  <span class="n">Show</span> <span class="n">the</span> <span class="n">version</span> <span class="ow">and</span> <span class="n">exit</span><span class="o">.</span>
+  <span class="o">--</span><span class="n">verbose</span>  <span class="n">Enable</span> <span class="n">verbose</span> <span class="n">logging</span><span class="o">.</span>
+  <span class="o">--</span><span class="n">help</span>     <span class="n">Show</span> <span class="n">this</span> <span class="n">message</span> <span class="ow">and</span> <span class="n">exit</span><span class="o">.</span>
+
+<span class="n">Commands</span><span class="p">:</span>
+  <span class="n">forward</span>  <span class="n">Forward</span> <span class="n">DNS</span> <span class="n">lookup</span><span class="o">.</span>
+  <span class="n">inverse</span>  <span class="n">Inverse</span> <span class="n">DNS</span> <span class="n">lookup</span><span class="o">.</span>
+  <span class="n">quotas</span>   <span class="n">Show</span> <span class="n">the</span> <span class="n">API</span> <span class="n">quotas</span> <span class="k">for</span> <span class="n">your</span> <span class="n">API</span> <span class="n">key</span> <span class="ow">and</span> <span class="n">exit</span><span class="o">.</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Usage</span><span class="p">:</span> <span class="n">dnsdb</span> <span class="n">forward</span> <span class="p">[</span><span class="n">OPTIONS</span><span class="p">]</span> <span class="n">OWNER_NAME</span>
+
+  <span class="n">Forward</span> <span class="n">DNS</span> <span class="n">lookup</span><span class="o">.</span>
+
+<span class="n">Options</span><span class="p">:</span>
+  <span class="o">-</span><span class="n">t</span><span class="p">,</span> <span class="o">--</span><span class="n">rrtype</span> <span class="n">TEXT</span>               <span class="n">Filter</span> <span class="n">results</span> <span class="n">by</span> <span class="n">DNS</span> <span class="n">resource</span> <span class="n">record</span> <span class="nb">type</span><span class="o">.</span>
+                                  <span class="p">[</span><span class="n">default</span><span class="p">:</span> <span class="n">ANY</span><span class="p">]</span>
+  <span class="o">-</span><span class="n">b</span><span class="p">,</span> <span class="o">--</span><span class="n">bailiwick</span> <span class="n">TEXT</span>            <span class="n">Filter</span> <span class="n">results</span> <span class="n">by</span> <span class="n">DNS</span> <span class="n">bailiwick</span><span class="o">.</span>
+  <span class="o">--</span><span class="n">first</span><span class="o">-</span><span class="n">seen</span><span class="o">-</span><span class="n">before</span> <span class="n">TEXT</span>        <span class="n">Only</span> <span class="n">show</span> <span class="n">results</span> <span class="n">first</span> <span class="n">seen</span> <span class="n">before</span> <span class="n">this</span>
+                                  <span class="n">date</span><span class="o">.</span>
+  <span class="o">--</span><span class="n">first</span><span class="o">-</span><span class="n">seen</span><span class="o">-</span><span class="n">after</span> <span class="n">TEXT</span>         <span class="n">Only</span> <span class="n">show</span> <span class="n">results</span> <span class="n">first</span> <span class="n">seen</span> <span class="n">after</span> <span class="n">this</span>
+                                  <span class="n">date</span><span class="o">.</span>
+  <span class="o">--</span><span class="n">last</span><span class="o">-</span><span class="n">seen</span><span class="o">-</span><span class="n">before</span> <span class="n">TEXT</span>         <span class="n">Only</span> <span class="n">show</span> <span class="n">results</span> <span class="n">last</span> <span class="n">seen</span> <span class="n">before</span> <span class="n">this</span>
+                                  <span class="n">date</span><span class="o">.</span>
+  <span class="o">--</span><span class="n">last</span><span class="o">-</span><span class="n">seen</span><span class="o">-</span><span class="n">after</span> <span class="n">TEXT</span>          <span class="n">Only</span> <span class="n">show</span> <span class="n">results</span> <span class="n">last</span> <span class="n">seen</span> <span class="n">after</span> <span class="n">this</span> <span class="n">date</span><span class="o">.</span>
+  <span class="o">-</span><span class="n">l</span><span class="p">,</span> <span class="o">--</span><span class="n">limit</span> <span class="n">INTEGER</span>             <span class="n">Limit</span> <span class="n">the</span> <span class="n">number</span> <span class="n">of</span> <span class="n">results</span> <span class="n">to</span> <span class="n">this</span> <span class="n">number</span><span class="o">.</span>
+  <span class="o">-</span><span class="n">s</span><span class="p">,</span> <span class="o">--</span><span class="n">sort</span> <span class="p">[</span><span class="n">count</span><span class="o">|</span><span class="n">first_seen</span><span class="o">|</span><span class="n">last_seen</span><span class="o">|</span><span class="n">rrname</span><span class="o">|</span><span class="n">rrtype</span><span class="o">|</span><span class="n">bailiwick</span><span class="o">|</span><span class="n">rdata</span><span class="o">|</span><span class="n">source</span><span class="p">]</span>
+                                  <span class="n">Sort</span> <span class="n">JSON</span> <span class="n">results</span> <span class="n">by</span> <span class="n">this</span> <span class="n">field</span><span class="o">.</span>
+  <span class="o">-</span><span class="n">r</span><span class="p">,</span> <span class="o">--</span><span class="n">reverse</span>                   <span class="n">Reverse</span> <span class="n">the</span> <span class="n">sorting</span><span class="o">.</span>
+  <span class="o">-</span><span class="n">f</span><span class="p">,</span> <span class="o">--</span><span class="nb">format</span> <span class="p">[</span><span class="n">text</span><span class="o">|</span><span class="n">json</span><span class="o">|</span><span class="n">csv</span><span class="p">]</span>    <span class="n">Set</span> <span class="n">the</span> <span class="n">screen</span> <span class="n">output</span> <span class="nb">format</span><span class="o">.</span>  <span class="p">[</span><span class="n">default</span><span class="p">:</span>
+                                  <span class="n">text</span><span class="p">]</span>
+  <span class="o">-</span><span class="n">o</span><span class="p">,</span> <span class="o">--</span><span class="n">output</span> <span class="n">FILE</span>               <span class="n">One</span> <span class="ow">or</span> <span class="n">more</span> <span class="n">output</span> <span class="n">file</span> <span class="n">paths</span> <span class="n">that</span> <span class="n">end</span> <span class="ow">in</span>
+                                  <span class="o">.</span><span class="n">csv</span><span class="p">,</span> <span class="o">.</span><span class="n">json</span><span class="p">,</span>  <span class="ow">or</span> <span class="o">.</span><span class="n">txt</span> <span class="p">(</span><span class="n">suppresses</span> <span class="n">screen</span>
+                                  <span class="n">output</span><span class="p">)</span><span class="o">.</span>
+  <span class="o">--</span><span class="n">help</span>                          <span class="n">Show</span> <span class="n">this</span> <span class="n">message</span> <span class="ow">and</span> <span class="n">exit</span><span class="o">.</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Usage</span><span class="p">:</span> <span class="n">dnsdb</span> <span class="n">inverse</span> <span class="p">[</span><span class="n">OPTIONS</span><span class="p">]</span> <span class="p">[</span><span class="n">name</span><span class="o">|</span><span class="n">ip</span><span class="o">|</span><span class="n">raw</span><span class="p">]</span> <span class="n">VALUE</span>
+
+  <span class="n">Inverse</span> <span class="n">DNS</span> <span class="n">lookup</span><span class="o">.</span>
+
+<span class="n">Options</span><span class="p">:</span>
+  <span class="o">-</span><span class="n">t</span><span class="p">,</span> <span class="o">--</span><span class="n">rrtype</span> <span class="n">TEXT</span>               <span class="n">Filter</span> <span class="n">results</span> <span class="n">by</span> <span class="n">DNS</span> <span class="n">resource</span> <span class="n">record</span> <span class="nb">type</span><span class="o">.</span>
+                                  <span class="p">[</span><span class="n">default</span><span class="p">:</span> <span class="n">ANY</span><span class="p">]</span>
+  <span class="o">--</span><span class="n">first</span><span class="o">-</span><span class="n">seen</span><span class="o">-</span><span class="n">before</span> <span class="n">TEXT</span>        <span class="n">Only</span> <span class="n">show</span> <span class="n">results</span> <span class="n">first</span> <span class="n">seen</span> <span class="n">before</span> <span class="n">this</span>
+                                  <span class="n">date</span><span class="o">.</span>
+  <span class="o">--</span><span class="n">first</span><span class="o">-</span><span class="n">seen</span><span class="o">-</span><span class="n">after</span> <span class="n">TEXT</span>         <span class="n">Only</span> <span class="n">show</span> <span class="n">results</span> <span class="n">first</span> <span class="n">seen</span> <span class="n">after</span> <span class="n">this</span>
+                                  <span class="n">date</span><span class="o">.</span>
+  <span class="o">--</span><span class="n">last</span><span class="o">-</span><span class="n">seen</span><span class="o">-</span><span class="n">before</span> <span class="n">TEXT</span>         <span class="n">Only</span> <span class="n">show</span> <span class="n">results</span> <span class="n">last</span> <span class="n">seen</span> <span class="n">before</span> <span class="n">this</span>
+                                  <span class="n">date</span><span class="o">.</span>
+  <span class="o">--</span><span class="n">last</span><span class="o">-</span><span class="n">seen</span><span class="o">-</span><span class="n">after</span> <span class="n">TEXT</span>          <span class="n">Only</span> <span class="n">show</span> <span class="n">results</span> <span class="n">last</span> <span class="n">seen</span> <span class="n">after</span> <span class="n">this</span> <span class="n">date</span><span class="o">.</span>
+  <span class="o">-</span><span class="n">l</span><span class="p">,</span> <span class="o">--</span><span class="n">limit</span> <span class="n">INTEGER</span>             <span class="n">Limit</span> <span class="n">the</span> <span class="n">number</span> <span class="n">of</span> <span class="n">results</span> <span class="n">to</span> <span class="n">this</span> <span class="n">number</span><span class="o">.</span>
+  <span class="o">-</span><span class="n">s</span><span class="p">,</span> <span class="o">--</span><span class="n">sort</span> <span class="p">[</span><span class="n">count</span><span class="o">|</span><span class="n">first_seen</span><span class="o">|</span><span class="n">last_seen</span><span class="o">|</span><span class="n">rrname</span><span class="o">|</span><span class="n">rrtype</span><span class="o">|</span><span class="n">bailiwick</span><span class="o">|</span><span class="n">rdata</span><span class="o">|</span><span class="n">source</span><span class="p">]</span>
+                                  <span class="n">Sort</span> <span class="n">JSON</span> <span class="n">results</span> <span class="n">by</span> <span class="n">this</span> <span class="n">field</span><span class="o">.</span>
+  <span class="o">-</span><span class="n">r</span><span class="p">,</span> <span class="o">--</span><span class="n">reverse</span>                   <span class="n">Reverse</span> <span class="n">the</span> <span class="n">sorting</span><span class="o">.</span>
+  <span class="o">-</span><span class="n">f</span><span class="p">,</span> <span class="o">--</span><span class="nb">format</span> <span class="p">[</span><span class="n">text</span><span class="o">|</span><span class="n">json</span><span class="o">|</span><span class="n">csv</span><span class="p">]</span>    <span class="n">Set</span> <span class="n">the</span> <span class="n">screen</span> <span class="n">output</span> <span class="nb">format</span><span class="o">.</span>  <span class="p">[</span><span class="n">default</span><span class="p">:</span>
+                                  <span class="n">text</span><span class="p">]</span>
+  <span class="o">-</span><span class="n">o</span><span class="p">,</span> <span class="o">--</span><span class="n">output</span> <span class="n">FILE</span>               <span class="n">One</span> <span class="ow">or</span> <span class="n">more</span> <span class="n">output</span> <span class="n">file</span> <span class="n">paths</span> <span class="n">that</span> <span class="n">end</span> <span class="ow">in</span>
+                                  <span class="o">.</span><span class="n">csv</span><span class="p">,</span> <span class="o">.</span><span class="n">json</span><span class="p">,</span>  <span class="ow">or</span> <span class="o">.</span><span class="n">txt</span> <span class="p">(</span><span class="n">suppresses</span> <span class="n">screen</span>
+                                  <span class="n">output</span><span class="p">)</span><span class="o">.</span>
+  <span class="o">--</span><span class="n">help</span>                          <span class="n">Show</span> <span class="n">this</span> <span class="n">message</span> <span class="ow">and</span> <span class="n">exit</span><span class="o">.</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
+<p>To install the latest stable version, run</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo -H pip3 install -U dnsdb-python
+</pre></div>
+</div>
+<p>To install the latest development version, run</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo -H pip3 install -U git+https://github.com/domainaware/dnsdb-python.git
+</pre></div>
+</div>
+<p>Store your API key as an environment variable named <code class="docutils literal notranslate"><span class="pre">DNSDB_KEY</span></code>.</p>
+<p>If you are using a self-hosted instance of DNSDB, store the URL root as an
+environment variable named <code class="docutils literal notranslate"><span class="pre">DNSDB_ROOT</span></code>.</p>
+</div>
+<div class="section" id="module-dnsdb">
+<span id="python-api"></span><h2>Python API<a class="headerlink" href="#module-dnsdb" title="Permalink to this headline">¶</a></h2>
+<p>An unofficial Farsight Security DNSDB client</p>
+<dl class="exception">
+<dt id="dnsdb.BadRequest">
+<em class="property">exception </em><code class="sig-prename descclassname">dnsdb.</code><code class="sig-name descname">BadRequest</code><a class="reference internal" href="_modules/dnsdb.html#BadRequest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dnsdb.BadRequest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Raised then a request is improperly formatted</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="dnsdb.DNSDBAPI">
+<em class="property">class </em><code class="sig-prename descclassname">dnsdb.</code><code class="sig-name descname">DNSDBAPI</code><span class="sig-paren">(</span><em class="sig-param">api_key=None</em>, <em class="sig-param">client_name=None</em>, <em class="sig-param">client_version=None</em>, <em class="sig-param">url_root='https://api.dnsdb.info'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dnsdb.html#DNSDBAPI"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dnsdb.DNSDBAPI" title="Permalink to this definition">¶</a></dt>
+<dd><p>A Python interface to the Farsight Security DNSDB API
+..</p>
+<dl class="method">
+<dt id="dnsdb.DNSDBAPI.forward_lookup">
+<code class="sig-name descname">forward_lookup</code><span class="sig-paren">(</span><em class="sig-param">owner_name</em>, <em class="sig-param">rrtype='ANY'</em>, <em class="sig-param">bailiwick=None</em>, <em class="sig-param">first_seen_before=None</em>, <em class="sig-param">first_seen_after=None</em>, <em class="sig-param">last_seen_before=None</em>, <em class="sig-param">last_seen_after=None</em>, <em class="sig-param">limit=None</em>, <em class="sig-param">sort_by=None</em>, <em class="sig-param">reverse=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dnsdb.html#DNSDBAPI.forward_lookup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dnsdb.DNSDBAPI.forward_lookup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Performs a forward DNS lookup</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>owner_name</strong> (<em>str</em>) – The DNS Owner Name</p></li>
+<li><p><strong>rrtype</strong> (<em>str</em>) – The DNS Resource Record type</p></li>
+<li><p><strong>bailiwick</strong> (<em>str</em>) – The DNS bailiwick</p></li>
+<li><p><strong>first_seen_before</strong> (<em>str</em>) – Filter results first seen before this date</p></li>
+<li><p><strong>first_seen_after</strong> (<em>str</em>) – Filter results first seen after this date</p></li>
+<li><p><strong>last_seen_before</strong> (<em>str</em>) – Filter results last seen before this date</p></li>
+<li><p><strong>last_seen_after</strong> (<em>str</em>) – Filter results first seen before after date</p></li>
+<li><p><strong>limit</strong> (<em>int</em>) – The maximum number of results to return</p></li>
+<li><p><strong>sort_by</strong> – An optional field to sort by</p></li>
+<li><p><strong>reverse</strong> (<em>bool</em>) – Reverse the sorting</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Results as a Python list, or as text in DNS master file format
+if <code class="docutils literal notranslate"><span class="pre">return_text</span></code> is <code class="docutils literal notranslate"><span class="pre">True</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="dnsdb.DNSDBAPI.inverse_lookup">
+<code class="sig-name descname">inverse_lookup</code><span class="sig-paren">(</span><em class="sig-param">_type</em>, <em class="sig-param">value</em>, <em class="sig-param">rrtype=None</em>, <em class="sig-param">first_seen_before=None</em>, <em class="sig-param">first_seen_after=None</em>, <em class="sig-param">last_seen_before=None</em>, <em class="sig-param">last_seen_after=None</em>, <em class="sig-param">limit=None</em>, <em class="sig-param">sort_by=None</em>, <em class="sig-param">reverse=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dnsdb.html#DNSDBAPI.inverse_lookup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dnsdb.DNSDBAPI.inverse_lookup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Performs a inverse DNS lookup</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>_type</strong> (<em>str</em>) – <p>One of the following:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">name</span></code>: A DNS domain name (use <code class="docutils literal notranslate"><span class="pre">*</span></code> as a wildcard)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ip</span></code>: An IPv4 or IPv6 address, range, or CIDR notation</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">raw</span></code>: An even number of hexadecimal digits</p></li>
+</ul>
+</p></li>
+<li><p><strong>value</strong> (<em>str</em>) – The rdata value to search for</p></li>
+<li><p><strong>rrtype</strong> (<em>str</em>) – The DNS Resource Record type</p></li>
+<li><p><strong>first_seen_before</strong> (<em>str</em>) – Filter results first seen before this date</p></li>
+<li><p><strong>first_seen_after</strong> (<em>str</em>) – Filter results first seen after this date</p></li>
+<li><p><strong>last_seen_before</strong> (<em>str</em>) – Filter results last seen before this date</p></li>
+<li><p><strong>last_seen_after</strong> (<em>str</em>) – Filter results first seen before after date</p></li>
+<li><p><strong>limit</strong> (<em>int</em>) – The maximum number of results to return</p></li>
+<li><p><strong>sort_by</strong> – An optional field to sort by</p></li>
+<li><p><strong>reverse</strong> (<em>bool</em>) – Reverse the sorting</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Results as a Python list, or as text in DNS master file format
+if <code class="docutils literal notranslate"><span class="pre">return_text</span></code> is <code class="docutils literal notranslate"><span class="pre">True</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="dnsdb.DNSDBAPIError">
+<em class="property">exception </em><code class="sig-prename descclassname">dnsdb.</code><code class="sig-name descname">DNSDBAPIError</code><a class="reference internal" href="_modules/dnsdb.html#DNSDBAPIError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dnsdb.DNSDBAPIError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Raised when an error is returned by DNSDB</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="dnsdb.InvalidAPIKey">
+<em class="property">exception </em><code class="sig-prename descclassname">dnsdb.</code><code class="sig-name descname">InvalidAPIKey</code><a class="reference internal" href="_modules/dnsdb.html#InvalidAPIKey"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dnsdb.InvalidAPIKey" title="Permalink to this definition">¶</a></dt>
+<dd><p>Raised when the API key is invalid, or the client IP address is not
+authorized for the account</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="dnsdb.QuotaExceeded">
+<em class="property">exception </em><code class="sig-prename descclassname">dnsdb.</code><code class="sig-name descname">QuotaExceeded</code><a class="reference internal" href="_modules/dnsdb.html#QuotaExceeded"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dnsdb.QuotaExceeded" title="Permalink to this definition">¶</a></dt>
+<dd><p>Raised when the API quota limit has been exceeded</p>
+<p>For time-based quotas: The API key daily quota limit is exceeded. The
+quota will automatically replenish, usually at the start of the next day.</p>
+<p>For block-based quotas: The block quota is exhausted. You may need to
+purchase a larger quota.</p>
+<p>For burst rate secondary quotas: There were too many queries within the
+burst window. The window will automatically reopen at its end.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="dnsdb.ServerSideError">
+<em class="property">exception </em><code class="sig-prename descclassname">dnsdb.</code><code class="sig-name descname">ServerSideError</code><a class="reference internal" href="_modules/dnsdb.html#ServerSideError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dnsdb.ServerSideError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Raised when a server side error occurs</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="dnsdb.TooManyConnections">
+<em class="property">exception </em><code class="sig-prename descclassname">dnsdb.</code><code class="sig-name descname">TooManyConnections</code><a class="reference internal" href="_modules/dnsdb.html#TooManyConnections"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dnsdb.TooManyConnections" title="Permalink to this definition">¶</a></dt>
+<dd><p>Raised when the limit of number of concurrent connections is exceeded</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="dnsdb.UnauthorizedAPIKey">
+<em class="property">exception </em><code class="sig-prename descclassname">dnsdb.</code><code class="sig-name descname">UnauthorizedAPIKey</code><a class="reference internal" href="_modules/dnsdb.html#UnauthorizedAPIKey"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dnsdb.UnauthorizedAPIKey" title="Permalink to this definition">¶</a></dt>
+<dd><p>Raised when the API key is not authorized
+(usually indicates the block quota is expired)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="dnsdb.dnsdb_results_to_csv">
+<code class="sig-prename descclassname">dnsdb.</code><code class="sig-name descname">dnsdb_results_to_csv</code><span class="sig-paren">(</span><em class="sig-param">results</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dnsdb.html#dnsdb_results_to_csv"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dnsdb.dnsdb_results_to_csv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts DNSDB results to CSV format</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>results</strong> (<em>dict</em>) – DNSDB results</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Results in CSV format</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="dnsdb.dnsdb_results_to_json">
+<code class="sig-prename descclassname">dnsdb.</code><code class="sig-name descname">dnsdb_results_to_json</code><span class="sig-paren">(</span><em class="sig-param">results</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dnsdb.html#dnsdb_results_to_json"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dnsdb.dnsdb_results_to_json" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts DNSDB results to pretty JSON</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>results</strong> (<em>dict</em>) – DNSDB results</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Results as a JSON string</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="dnsdb.dnsdb_results_to_text">
+<code class="sig-prename descclassname">dnsdb.</code><code class="sig-name descname">dnsdb_results_to_text</code><span class="sig-paren">(</span><em class="sig-param">results</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dnsdb.html#dnsdb_results_to_text"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dnsdb.dnsdb_results_to_text" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts DNSDB results to text in DNS master File format</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>results</strong> (<em>dict</em>) – DNSDB results</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>DNS master file content</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<div class="toctree-wrapper compound">
+</div>
+</div>
+<div class="section" id="see-also">
+<h2>See also<a class="headerlink" href="#see-also" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://www.farsightsecurity.com/dnsdb-community-edition/">DNSDB Community Edition</a></p></li>
+<li><p><a class="reference external" href="https://api.dnsdb.info/">DNSDB API reference</a></p></li>
+</ul>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Sean Whalen
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

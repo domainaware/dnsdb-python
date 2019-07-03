@@ -1,0 +1,924 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>dnsdb &mdash; dnsdb-python 1.2. documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> dnsdb-python
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.2.
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <!-- Local TOC -->
+              <div class="local-toc"></div>
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">dnsdb-python</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="index.html">Module code</a> &raquo;</li>
+        
+      <li>dnsdb</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for dnsdb</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/enc/python</span>
+<span class="c1"># -*- coding: utf-8 -*-</span>
+
+<span class="sd">&quot;&quot;&quot;An unofficial Farsight Security DNSDB client&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">print_function</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">locale</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="k">import</span> <span class="n">datetime</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">OrderedDict</span>
+<span class="kn">from</span> <span class="nn">csv</span> <span class="k">import</span> <span class="n">DictWriter</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="c1"># Python 2 support</span>
+    <span class="kn">from</span> <span class="nn">cStringIO</span> <span class="k">import</span> <span class="n">StringIO</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">io</span> <span class="k">import</span> <span class="n">StringIO</span>
+
+<span class="kn">import</span> <span class="nn">dateparser</span>
+<span class="kn">import</span> <span class="nn">click</span>
+<span class="kn">from</span> <span class="nn">dateutil</span> <span class="k">import</span> <span class="n">tz</span>
+<span class="kn">from</span> <span class="nn">requests</span> <span class="k">import</span> <span class="n">session</span>
+
+<span class="sd">&quot;&quot;&quot;Copyright 2019 Sean Whalen</span>
+
+<span class="sd">Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="sd">you may not use this file except in compliance with the License.</span>
+<span class="sd">You may obtain a copy of the License at</span>
+
+<span class="sd">   http://www.apache.org/licenses/LICENSE-2.0</span>
+
+<span class="sd">Unless required by applicable law or agreed to in writing, software</span>
+<span class="sd">distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="sd">WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="sd">See the License for the specific language governing permissions and</span>
+<span class="sd">limitations under the License.&quot;&quot;&quot;</span>
+
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;1.2.&quot;</span>
+
+<span class="n">locale</span><span class="o">.</span><span class="n">setlocale</span><span class="p">(</span><span class="n">locale</span><span class="o">.</span><span class="n">LC_ALL</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_epoch_to_datetime</span><span class="p">(</span><span class="n">epoch_seconds</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts a UTC UNIX epoch timestamp to a Python DateTime object</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        epoch_seconds: A UNIX epoch value</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        DateTime: A Python DateTime representation of the epoch value</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">epoch_seconds</span><span class="p">)</span> <span class="o">==</span> <span class="n">datetime</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">epoch_seconds</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">epoch_seconds</span><span class="p">),</span> <span class="n">tz</span><span class="o">=</span><span class="n">tz</span><span class="o">.</span><span class="n">tzutc</span><span class="p">())</span>
+
+
+<span class="k">def</span> <span class="nf">_timestamp_to_iso8601</span><span class="p">(</span><span class="n">dt</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts a datetime object or epoch timestamp to an ISO 8601 string</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        dt (datetime): The datetime to convert</span>
+<span class="sd">        dt (int): epoch timestamp</span>
+
+<span class="sd">    Returns:</span>
+
+<span class="sd">    str: a timestamp in ISO 5601 format</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">dt</span><span class="p">)</span> <span class="o">==</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="n">dt</span> <span class="o">=</span> <span class="n">_epoch_to_datetime</span><span class="p">(</span><span class="n">dt</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">dt</span><span class="o">.</span><span class="n">isoformat</span><span class="p">()</span>
+
+
+<span class="k">def</span> <span class="nf">_datetime_to_timestamp</span><span class="p">(</span><span class="n">dt</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts a Python datetime object to a UNIX timestamp</span>
+<span class="sd">    Args:</span>
+<span class="sd">        dt (datetime): A python datetime object</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        int: A UNIX timestamp</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">int</span><span class="p">((</span><span class="n">dt</span> <span class="o">-</span> <span class="n">datetime</span><span class="p">(</span><span class="mi">1970</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">())</span>
+
+
+<div class="viewcode-block" id="DNSDBAPIError"><a class="viewcode-back" href="../index.html#dnsdb.DNSDBAPIError">[docs]</a><span class="k">class</span> <span class="nc">DNSDBAPIError</span><span class="p">(</span><span class="ne">RuntimeError</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Raised when an error is returned by DNSDB</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="BadRequest"><a class="viewcode-back" href="../index.html#dnsdb.BadRequest">[docs]</a><span class="k">class</span> <span class="nc">BadRequest</span><span class="p">(</span><span class="n">DNSDBAPIError</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Raised then a request is improperly formatted</span>
+<span class="sd">    &quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="UnauthorizedAPIKey"><a class="viewcode-back" href="../index.html#dnsdb.UnauthorizedAPIKey">[docs]</a><span class="k">class</span> <span class="nc">UnauthorizedAPIKey</span><span class="p">(</span><span class="n">DNSDBAPIError</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Raised when the API key is not authorized</span>
+<span class="sd">    (usually indicates the block quota is expired)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="InvalidAPIKey"><a class="viewcode-back" href="../index.html#dnsdb.InvalidAPIKey">[docs]</a><span class="k">class</span> <span class="nc">InvalidAPIKey</span><span class="p">(</span><span class="n">DNSDBAPIError</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Raised when the API key is invalid, or the client IP address is not</span>
+<span class="sd">    authorized for the account</span>
+<span class="sd">    &quot;&quot;&quot;</span></div>
+
+
+<span class="k">class</span> <span class="nc">_NoRecordsFound</span><span class="p">(</span><span class="n">DNSDBAPIError</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Raised when no records are found for the given lookup</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="QuotaExceeded"><a class="viewcode-back" href="../index.html#dnsdb.QuotaExceeded">[docs]</a><span class="k">class</span> <span class="nc">QuotaExceeded</span><span class="p">(</span><span class="n">DNSDBAPIError</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Raised when the API quota limit has been exceeded</span>
+
+<span class="sd">    For time-based quotas: The API key daily quota limit is exceeded. The</span>
+<span class="sd">    quota will automatically replenish, usually at the start of the next day.</span>
+
+<span class="sd">    For block-based quotas: The block quota is exhausted. You may need to</span>
+<span class="sd">    purchase a larger quota.</span>
+
+<span class="sd">    For burst rate secondary quotas: There were too many queries within the</span>
+<span class="sd">    burst window. The window will automatically reopen at its end.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="ServerSideError"><a class="viewcode-back" href="../index.html#dnsdb.ServerSideError">[docs]</a><span class="k">class</span> <span class="nc">ServerSideError</span><span class="p">(</span><span class="n">DNSDBAPIError</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Raised when a server side error occurs</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="TooManyConnections"><a class="viewcode-back" href="../index.html#dnsdb.TooManyConnections">[docs]</a><span class="k">class</span> <span class="nc">TooManyConnections</span><span class="p">(</span><span class="n">DNSDBAPIError</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Raised when the limit of number of concurrent connections is exceeded</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">pass</span></div>
+
+
+<span class="k">def</span> <span class="nf">_load_json</span><span class="p">(</span><span class="n">dnsdb_json_string</span><span class="p">,</span> <span class="n">sort_by</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts the lines of separate provided by DNSDB to a Python list</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        dnsdb_json_string (str): JSON output from DNSDBAPI</span>
+<span class="sd">        sort_by: An optional field to sort by</span>
+<span class="sd">        reverse (bool): Reverse the sorting</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        list: A Python list of result of result dictionaries</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">dnsdb_json_string</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;uft-8&quot;</span><span class="p">)</span>
+            <span class="n">new_result</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
+            <span class="k">if</span> <span class="s2">&quot;bailiwick&quot;</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+                <span class="n">new_result</span><span class="p">[</span><span class="s2">&quot;bailiwick&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;bailiwick&quot;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="s2">&quot;count&quot;</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+                <span class="n">new_result</span><span class="p">[</span><span class="s2">&quot;count&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;count&quot;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="s2">&quot;time_first&quot;</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+                <span class="n">new_result</span><span class="p">[</span><span class="s2">&quot;first_seen&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;time_first&quot;</span><span class="p">]</span>
+                <span class="n">new_result</span><span class="p">[</span><span class="s2">&quot;last_seen&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;time_last&quot;</span><span class="p">]</span>
+                <span class="n">new_result</span><span class="p">[</span><span class="s2">&quot;source&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;sensor&quot;</span>
+            <span class="k">elif</span> <span class="s2">&quot;zone_first&quot;</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+                <span class="n">new_result</span><span class="p">[</span><span class="s2">&quot;first_seen&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;zone_first_seen&quot;</span><span class="p">]</span>
+                <span class="n">new_result</span><span class="p">[</span><span class="s2">&quot;last_seen&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;zone_last_seen&quot;</span><span class="p">]</span>
+                <span class="n">new_result</span><span class="p">[</span><span class="s2">&quot;source&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;zone&quot;</span>
+            <span class="k">if</span> <span class="s2">&quot;rrname&quot;</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+                <span class="n">new_result</span><span class="p">[</span><span class="s2">&quot;rrname&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;rrname&quot;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="s2">&quot;rrtype&quot;</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+                <span class="n">new_result</span><span class="p">[</span><span class="s2">&quot;rrtype&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;rrtype&quot;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="s2">&quot;rdata&quot;</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+                <span class="n">new_result</span><span class="p">[</span><span class="s2">&quot;rdata&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;rdata&quot;</span><span class="p">]</span>
+
+            <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_result</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">sort_by</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">results</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span>
+                <span class="n">results</span><span class="p">,</span>
+                <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="n">sort_by</span><span class="p">],</span> <span class="n">reverse</span><span class="o">=</span><span class="n">reverse</span><span class="p">))</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s2">&quot;Unable to sort by </span><span class="si">{0}</span><span class="s2">. &quot;</span>
+                           <span class="s2">&quot;Field does not exist&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">sort_by</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">results</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s2">&quot;first_seen&quot;</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+            <span class="n">result</span><span class="p">[</span><span class="s2">&quot;first_seen&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_epoch_to_datetime</span><span class="p">(</span>
+                <span class="n">result</span><span class="p">[</span><span class="s2">&quot;first_seen&quot;</span><span class="p">])</span>
+        <span class="k">if</span> <span class="s2">&quot;last_seen&quot;</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+            <span class="n">result</span><span class="p">[</span><span class="s2">&quot;last_seen&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_epoch_to_datetime</span><span class="p">(</span>
+                <span class="n">result</span><span class="p">[</span><span class="s2">&quot;last_seen&quot;</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">results</span>
+
+
+<div class="viewcode-block" id="dnsdb_results_to_json"><a class="viewcode-back" href="../index.html#dnsdb.dnsdb_results_to_json">[docs]</a><span class="k">def</span> <span class="nf">dnsdb_results_to_json</span><span class="p">(</span><span class="n">results</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts DNSDB results to pretty JSON</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        results (dict): DNSDB results</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        str: Results as a JSON string</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">results</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s2">&quot;first_seen&quot;</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+            <span class="n">result</span><span class="p">[</span><span class="s2">&quot;first_seen&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_timestamp_to_iso8601</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;first_seen&quot;</span><span class="p">])</span>
+        <span class="k">if</span> <span class="s2">&quot;last_seen&quot;</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+            <span class="n">result</span><span class="p">[</span><span class="s2">&quot;last_seen&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_timestamp_to_iso8601</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;last_seen&quot;</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">ensure_ascii</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+
+
+<span class="k">def</span> <span class="nf">_dnsdb_result_to_text</span><span class="p">(</span><span class="n">result</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts a single DNSDB result to text in DNS master File format</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        result (dict): DNSDB result</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        str: DNS master file content</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="k">if</span> <span class="s1">&#39;bailiwick&#39;</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="s1">&#39;;; bailiwick:  </span><span class="si">{0}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;bailiwick&quot;</span><span class="p">])</span>
+
+    <span class="k">if</span> <span class="s1">&#39;count&#39;</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="s1">&#39;;; count:      </span><span class="si">{0}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">locale</span><span class="o">.</span><span class="n">format_string</span><span class="p">(</span>
+            <span class="s2">&quot;</span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="n">result</span><span class="p">[</span><span class="s2">&quot;count&quot;</span><span class="p">],</span>
+            <span class="kc">True</span>
+        <span class="p">))</span>
+    <span class="k">if</span> <span class="s2">&quot;source&quot;</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="s2">&quot;;; source:     </span><span class="si">{0}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;source&quot;</span><span class="p">])</span>
+
+    <span class="k">if</span> <span class="s1">&#39;first_seen&#39;</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="s1">&#39;;; first seen: </span><span class="si">{0}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">_timestamp_to_iso8601</span><span class="p">(</span>
+            <span class="n">result</span><span class="p">[</span><span class="s2">&quot;first_seen&quot;</span><span class="p">]</span>
+        <span class="p">))</span>
+    <span class="k">if</span> <span class="s1">&#39;last_seen&#39;</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="s1">&#39;;; last seen:  </span><span class="si">{0}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">_timestamp_to_iso8601</span><span class="p">(</span>
+            <span class="n">result</span><span class="p">[</span><span class="s2">&quot;last_seen&quot;</span><span class="p">]</span>
+        <span class="p">))</span>
+
+    <span class="k">if</span> <span class="s1">&#39;rdata&#39;</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;rdata&quot;</span><span class="p">])</span> <span class="o">==</span> <span class="nb">list</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">rdata</span> <span class="ow">in</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;rdata&#39;</span><span class="p">]:</span>
+                <span class="n">s</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="si">{0}</span><span class="s1"> IN </span><span class="si">{1}</span><span class="s1"> </span><span class="si">{2}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="s1">&#39;rrname&#39;</span><span class="p">],</span>
+                                               <span class="n">result</span><span class="p">[</span><span class="s1">&#39;rrtype&#39;</span><span class="p">],</span>
+                                               <span class="n">rdata</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="si">{0}</span><span class="s1"> IN </span><span class="si">{1}</span><span class="s1"> </span><span class="si">{2}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="s1">&#39;rrname&#39;</span><span class="p">],</span>
+                                           <span class="n">result</span><span class="p">[</span><span class="s1">&#39;rrtype&#39;</span><span class="p">],</span>
+                                           <span class="n">result</span><span class="p">[</span><span class="s2">&quot;rdata&quot;</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">s</span>
+
+
+<div class="viewcode-block" id="dnsdb_results_to_text"><a class="viewcode-back" href="../index.html#dnsdb.dnsdb_results_to_text">[docs]</a><span class="k">def</span> <span class="nf">dnsdb_results_to_text</span><span class="p">(</span><span class="n">results</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts DNSDB results to text in DNS master File format</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        results (dict): DNSDB results</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        str: DNS master file content</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
+    <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">_dnsdb_result_to_text</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">results</span><span class="p">)))</span></div>
+
+
+<div class="viewcode-block" id="dnsdb_results_to_csv"><a class="viewcode-back" href="../index.html#dnsdb.dnsdb_results_to_csv">[docs]</a><span class="k">def</span> <span class="nf">dnsdb_results_to_csv</span><span class="p">(</span><span class="n">results</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts DNSDB results to CSV format</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        results (dict): DNSDB results</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        str: Results in CSV format</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
+    <span class="n">csv_file</span> <span class="o">=</span> <span class="n">StringIO</span><span class="p">()</span>
+    <span class="n">fields</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;bailiwick&quot;</span><span class="p">,</span> <span class="s2">&quot;count&quot;</span><span class="p">,</span> <span class="s2">&quot;first_seen&quot;</span><span class="p">,</span> <span class="s2">&quot;last_seen&quot;</span><span class="p">,</span> <span class="s2">&quot;source&quot;</span><span class="p">,</span>
+              <span class="s2">&quot;rrname&quot;</span><span class="p">,</span> <span class="s2">&quot;rrtype&quot;</span><span class="p">,</span> <span class="s2">&quot;rdata&quot;</span><span class="p">]</span>
+    <span class="n">csv</span> <span class="o">=</span> <span class="n">DictWriter</span><span class="p">(</span><span class="n">csv_file</span><span class="p">,</span> <span class="n">fieldnames</span><span class="o">=</span><span class="n">fields</span><span class="p">)</span>
+    <span class="n">csv</span><span class="o">.</span><span class="n">writeheader</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">results</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s2">&quot;first_seen&quot;</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+            <span class="n">result</span><span class="p">[</span><span class="s2">&quot;first_seen&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_timestamp_to_iso8601</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;first_seen&quot;</span><span class="p">])</span>
+        <span class="k">if</span> <span class="s2">&quot;last_seen&quot;</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+            <span class="n">result</span><span class="p">[</span><span class="s2">&quot;last_seen&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_timestamp_to_iso8601</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;last_seen&quot;</span><span class="p">])</span>
+        <span class="k">if</span> <span class="s2">&quot;rdata&quot;</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;rdata&quot;</span><span class="p">])</span> <span class="o">==</span> <span class="nb">list</span><span class="p">:</span>
+                <span class="n">result</span><span class="p">[</span><span class="s2">&quot;rdata&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;|&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;rdata&quot;</span><span class="p">])</span>
+        <span class="n">csv</span><span class="o">.</span><span class="n">writerow</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+
+    <span class="n">csv_file</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">csv_file</span><span class="o">.</span><span class="n">read</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="DNSDBAPI"><a class="viewcode-back" href="../index.html#dnsdb.DNSDBAPI">[docs]</a><span class="k">class</span> <span class="nc">DNSDBAPI</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A Python interface to the Farsight Security DNSDB API</span>
+<span class="sd">    ..</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">client_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">client_version</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">url_root</span><span class="o">=</span><span class="s2">&quot;https://api.dnsdb.info&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Configures the API client</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            api_key (str): DNSDB API key; overridden by the</span>
+<span class="sd">            ``DNSDB_KEY`` environment variable</span>
+<span class="sd">            client_name (str): The client&#39;s name</span>
+<span class="sd">            client_version (str): The client&#39;s version</span>
+<span class="sd">            url_root (str): The root URL of the DNSDB API</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="s2">&quot;DNSDB_KEY&quot;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">:</span>
+            <span class="n">api_key</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;DNSDB_KEY&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="s2">&quot;DNSDB_ROOT&quot;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">:</span>
+            <span class="n">url_root</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;DNSDB_ROOT&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">api_key</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">InvalidAPIKey</span><span class="p">(</span>
+                <span class="s2">&quot;An API key must provided as the api_key parameter, or the &quot;</span>
+                <span class="s2">&quot;DNSDB_KEY environment variable.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">api_key</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;dce-&quot;</span><span class="p">):</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;DNSDB Community Edition (DCE) key detected. Time &quot;</span>
+                            <span class="s2">&quot;filtering and number of results will be limited.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">client_name</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">client_version</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">client_name</span> <span class="o">=</span> <span class="s2">&quot;dnsdb-python&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">client_version</span> <span class="o">=</span> <span class="n">__version__</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">client_name</span> <span class="o">=</span> <span class="n">client_name</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">client_version</span> <span class="o">=</span> <span class="n">client_version</span>
+
+        <span class="n">user_agent</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{0}</span><span class="s2">/</span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">client_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">client_version</span><span class="p">)</span>
+        <span class="n">default_headers</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;User-Agent&quot;</span><span class="p">:</span> <span class="n">user_agent</span><span class="p">,</span> <span class="s2">&quot;X-API-Key&quot;</span><span class="p">:</span> <span class="n">api_key</span><span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_root</span> <span class="o">=</span> <span class="n">url_root</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_api_key</span> <span class="o">=</span> <span class="n">api_key</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_session</span> <span class="o">=</span> <span class="n">session</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_session</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">default_headers</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">endpoint</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">_json</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+             <span class="n">sort_by</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="n">default_params</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">swclient</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">client_name</span><span class="p">,</span>
+                              <span class="n">version</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">client_version</span><span class="p">)</span>
+        <span class="n">_params</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">default_params</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">params</span><span class="p">:</span>
+            <span class="n">_params</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+        <span class="n">endpoint</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{0}</span><span class="s2">/</span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_root</span><span class="p">,</span> <span class="n">endpoint</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">))</span>
+        <span class="n">headers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_session</span><span class="o">.</span><span class="n">headers</span>
+        <span class="k">if</span> <span class="n">_json</span> <span class="ow">is</span> <span class="kc">False</span> <span class="ow">and</span> <span class="n">sort_by</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Sorting can only be used with JSON&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">_json</span><span class="p">:</span>
+            <span class="n">headers</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;Accept&quot;</span><span class="p">:</span> <span class="s2">&quot;application/json&quot;</span><span class="p">})</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">endpoint</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">_params</span><span class="p">)</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Querying </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">url</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">_json</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">_load_json</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">text</span><span class="p">,</span> <span class="n">sort_by</span><span class="o">=</span><span class="n">sort_by</span><span class="p">,</span>
+                                  <span class="n">reverse</span><span class="o">=</span><span class="n">reverse</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">response</span><span class="o">.</span><span class="n">text</span>
+        <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">400</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">BadRequest</span><span class="p">(</span><span class="s2">&quot;The request is improperly formatted&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">401</span><span class="p">:</span>
+            <span class="n">error_msg</span> <span class="o">=</span> <span class="s2">&quot;the API key is not authorized &quot;</span> \
+                        <span class="s2">&quot;(usually indicates the block quota is expired)&quot;</span>
+            <span class="k">raise</span> <span class="n">UnauthorizedAPIKey</span><span class="p">(</span><span class="n">error_msg</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">403</span><span class="p">:</span>
+            <span class="n">error_msg</span> <span class="o">=</span> <span class="s2">&quot;The API key is invalid, or the client IP &quot;</span> \
+                        <span class="s2">&quot;address is not authorized for the account&quot;</span>
+            <span class="k">raise</span> <span class="n">InvalidAPIKey</span><span class="p">(</span><span class="n">error_msg</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">404</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">_NoRecordsFound</span><span class="p">(</span><span class="s2">&quot;No records found for the given lookup&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">429</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">QuotaExceeded</span><span class="p">(</span><span class="s2">&quot;API quota exceeded&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">500</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ServerSideError</span><span class="p">(</span><span class="s2">&quot;Error processing the request&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">503</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">TooManyConnections</span><span class="p">(</span><span class="s2">&quot;Too many concurrent connections&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">error_msg</span> <span class="o">=</span> <span class="s2">&quot;Unexpected status code: &quot;</span> \
+                        <span class="s2">&quot;</span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">DNSDBAPIError</span><span class="p">(</span><span class="n">error_msg</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">get_quotas</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">quotas</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get</span><span class="p">(</span><span class="s2">&quot;/lookup/rate_limit&quot;</span><span class="p">,</span> <span class="n">_json</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">quotas</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">quotas</span><span class="p">)[</span><span class="s2">&quot;rate&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="s2">&quot;limit&quot;</span> <span class="ow">in</span> <span class="n">quotas</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">quotas</span><span class="p">[</span><span class="s2">&quot;limit&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;unlimited&quot;</span><span class="p">:</span>
+                <span class="n">quotas</span><span class="p">[</span><span class="s2">&quot;limit&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="s2">&quot;reset&quot;</span> <span class="ow">in</span> <span class="n">quotas</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">quotas</span><span class="p">[</span><span class="s2">&quot;reset&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;n/a&quot;</span><span class="p">:</span>
+                <span class="k">del</span> <span class="n">quotas</span><span class="p">[</span><span class="s2">&quot;reset&quot;</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">quotas</span><span class="p">[</span><span class="s2">&quot;reset&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_timestamp_to_iso8601</span><span class="p">(</span><span class="n">quotas</span><span class="p">[</span><span class="s2">&quot;reset&quot;</span><span class="p">])</span>
+        <span class="k">if</span> <span class="s2">&quot;expires&quot;</span> <span class="ow">in</span> <span class="n">quotas</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">quotas</span><span class="p">[</span><span class="s2">&quot;expires&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;n/a&quot;</span><span class="p">:</span>
+                <span class="k">del</span> <span class="n">quotas</span><span class="p">[</span><span class="s2">&quot;expires&quot;</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">quotas</span><span class="p">[</span><span class="s2">&quot;expires&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_timestamp_to_iso8601</span><span class="p">(</span><span class="n">quotas</span><span class="p">[</span><span class="s2">&quot;expires&quot;</span><span class="p">])</span>
+        <span class="k">if</span> <span class="s2">&quot;remaining&quot;</span> <span class="ow">in</span> <span class="n">quotas</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">quotas</span><span class="p">[</span><span class="s2">&quot;remaining&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;n/a&quot;</span><span class="p">:</span>
+                <span class="k">del</span> <span class="n">quotas</span><span class="p">[</span><span class="s2">&quot;remaining&quot;</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">quotas</span>
+
+<div class="viewcode-block" id="DNSDBAPI.forward_lookup"><a class="viewcode-back" href="../index.html#dnsdb.DNSDBAPI.forward_lookup">[docs]</a>    <span class="k">def</span> <span class="nf">forward_lookup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">owner_name</span><span class="p">,</span> <span class="n">rrtype</span><span class="o">=</span><span class="s2">&quot;ANY&quot;</span><span class="p">,</span> <span class="n">bailiwick</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                       <span class="n">first_seen_before</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">first_seen_after</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                       <span class="n">last_seen_before</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">last_seen_after</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                       <span class="n">limit</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sort_by</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Performs a forward DNS lookup</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            owner_name (str): The DNS Owner Name</span>
+<span class="sd">            rrtype (str): The DNS Resource Record type</span>
+<span class="sd">            bailiwick (str): The DNS bailiwick</span>
+<span class="sd">            first_seen_before (str): Filter results first seen before this date</span>
+<span class="sd">            first_seen_after (str): Filter results first seen after this date</span>
+<span class="sd">            last_seen_before (str): Filter results last seen before this date</span>
+<span class="sd">            last_seen_after (str): Filter results first seen before after date</span>
+<span class="sd">            limit (int): The maximum number of results to return</span>
+<span class="sd">            sort_by: An optional field to sort by</span>
+<span class="sd">            reverse (bool): Reverse the sorting</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Results as a Python list, or as text in DNS master file format</span>
+<span class="sd">            if ``return_text`` is ``True``</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">rrtype</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">rrtype</span> <span class="o">=</span> <span class="n">rrtype</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">limit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">params</span><span class="p">[</span><span class="s2">&quot;limit&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">limit</span>
+        <span class="k">if</span> <span class="n">bailiwick</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">rrtype</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;rrtype must be specified when using bailiwick&quot;</span><span class="p">)</span>
+        <span class="n">endpoint</span> <span class="o">=</span> <span class="s2">&quot;/lookup/rrset/name/</span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">owner_name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">rrtype</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">endpoint</span> <span class="o">+=</span> <span class="s2">&quot;/</span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">rrtype</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">bailiwick</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">endpoint</span> <span class="o">+=</span> <span class="s2">&quot;/</span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">bailiwick</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">first_seen_before</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">first_seen_before</span> <span class="o">=</span> <span class="n">_datetime_to_timestamp</span><span class="p">(</span>
+                <span class="n">dateparser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">first_seen_before</span><span class="p">))</span>
+            <span class="n">params</span><span class="p">[</span><span class="s2">&quot;time_first_before&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">first_seen_before</span>
+        <span class="k">if</span> <span class="n">first_seen_after</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">first_seen_after</span> <span class="o">=</span> <span class="n">_datetime_to_timestamp</span><span class="p">(</span>
+                <span class="n">dateparser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">first_seen_after</span><span class="p">))</span>
+            <span class="n">params</span><span class="p">[</span><span class="s2">&quot;time_first_after&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">first_seen_after</span>
+        <span class="k">if</span> <span class="n">last_seen_before</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">last_seen_before</span> <span class="o">=</span> <span class="n">_datetime_to_timestamp</span><span class="p">(</span>
+                <span class="n">dateparser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">last_seen_before</span><span class="p">))</span>
+            <span class="n">params</span><span class="p">[</span><span class="s2">&quot;time_last_before&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">last_seen_before</span>
+        <span class="k">if</span> <span class="n">last_seen_after</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">last_seen_after</span> <span class="o">=</span> <span class="n">_datetime_to_timestamp</span><span class="p">(</span>
+                <span class="n">dateparser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">last_seen_after</span><span class="p">))</span>
+            <span class="n">params</span><span class="p">[</span><span class="s2">&quot;time_last_after&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">last_seen_after</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get</span><span class="p">(</span><span class="n">endpoint</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">,</span>
+                             <span class="n">sort_by</span><span class="o">=</span><span class="n">sort_by</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="n">reverse</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">_NoRecordsFound</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[]</span></div>
+
+<div class="viewcode-block" id="DNSDBAPI.inverse_lookup"><a class="viewcode-back" href="../index.html#dnsdb.DNSDBAPI.inverse_lookup">[docs]</a>    <span class="k">def</span> <span class="nf">inverse_lookup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_type</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">rrtype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                       <span class="n">first_seen_before</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">first_seen_after</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                       <span class="n">last_seen_before</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">last_seen_after</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                       <span class="n">limit</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sort_by</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Performs a inverse DNS lookup</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            _type (str): One of the following:</span>
+
+<span class="sd">                - ``name``: A DNS domain name (use ``*`` as a wildcard)</span>
+<span class="sd">                - ``ip``: An IPv4 or IPv6 address, range, or CIDR notation</span>
+<span class="sd">                - ``raw``: An even number of hexadecimal digits</span>
+
+<span class="sd">            value (str): The rdata value to search for</span>
+<span class="sd">            rrtype (str): The DNS Resource Record type</span>
+<span class="sd">            first_seen_before (str): Filter results first seen before this date</span>
+<span class="sd">            first_seen_after (str): Filter results first seen after this date</span>
+<span class="sd">            last_seen_before (str): Filter results last seen before this date</span>
+<span class="sd">            last_seen_after (str): Filter results first seen before after date</span>
+<span class="sd">            limit (int): The maximum number of results to return</span>
+<span class="sd">            sort_by: An optional field to sort by</span>
+<span class="sd">            reverse (bool): Reverse the sorting</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Results as a Python list, or as text in DNS master file format</span>
+<span class="sd">            if ``return_text`` is ``True``</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">rrtype</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">rrtype</span> <span class="o">=</span> <span class="n">rrtype</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">limit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">params</span><span class="p">[</span><span class="s2">&quot;limit&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">limit</span>
+        <span class="n">_type</span> <span class="o">=</span> <span class="n">_type</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;ip&quot;</span><span class="p">,</span> <span class="s2">&quot;raw&quot;</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;_type must be name, ip, or raw&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">_type</span> <span class="o">==</span> <span class="s2">&quot;ip&quot;</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">,</span> <span class="s2">&quot;,&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\\</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;,&quot;</span><span class="p">)</span>
+        <span class="n">endpoint</span> <span class="o">=</span> <span class="s2">&quot;/lookup/rdata/</span><span class="si">{0}</span><span class="s2">/</span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">_type</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">rrtype</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">endpoint</span> <span class="o">+=</span> <span class="s2">&quot;/</span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">rrtype</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">first_seen_before</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">first_seen_before</span> <span class="o">=</span> <span class="n">_datetime_to_timestamp</span><span class="p">(</span>
+                <span class="n">dateparser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">first_seen_before</span><span class="p">))</span>
+            <span class="n">params</span><span class="p">[</span><span class="s2">&quot;time_first_before&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">first_seen_before</span>
+        <span class="k">if</span> <span class="n">first_seen_after</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">first_seen_after</span> <span class="o">=</span> <span class="n">_datetime_to_timestamp</span><span class="p">(</span>
+                <span class="n">dateparser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">first_seen_after</span><span class="p">))</span>
+            <span class="n">params</span><span class="p">[</span><span class="s2">&quot;time_first_after&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">first_seen_after</span>
+        <span class="k">if</span> <span class="n">last_seen_before</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">last_seen_before</span> <span class="o">=</span> <span class="n">_datetime_to_timestamp</span><span class="p">(</span>
+                <span class="n">dateparser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">last_seen_before</span><span class="p">))</span>
+            <span class="n">params</span><span class="p">[</span><span class="s2">&quot;time_last_before&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">last_seen_before</span>
+        <span class="k">if</span> <span class="n">last_seen_after</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">last_seen_after</span> <span class="o">=</span> <span class="n">_datetime_to_timestamp</span><span class="p">(</span>
+                <span class="n">dateparser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">last_seen_after</span><span class="p">))</span>
+            <span class="n">params</span><span class="p">[</span><span class="s2">&quot;time_last_after&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">last_seen_after</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get</span><span class="p">(</span><span class="n">endpoint</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">,</span>
+                             <span class="n">sort_by</span><span class="o">=</span><span class="n">sort_by</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="n">reverse</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">_NoRecordsFound</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[]</span></div></div>
+
+
+<span class="k">class</span> <span class="nc">_CLIConfig</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">,</span>
+                                <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%(levelname)s</span><span class="s2">: </span><span class="si">%(message)s</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">WARNING</span><span class="p">,</span>
+                                <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%(levelname)s</span><span class="s2">: </span><span class="si">%(message)s</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">client</span> <span class="o">=</span> <span class="n">DNSDBAPI</span><span class="p">()</span>
+        <span class="k">except</span> <span class="n">InvalidAPIKey</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;DNSDB_KEY environment variable missing or &quot;</span>
+                          <span class="s2">&quot;invalid.&quot;</span><span class="p">)</span>
+            <span class="n">exit</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+
+<span class="nd">@click</span><span class="o">.</span><span class="n">group</span><span class="p">()</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">version_option</span><span class="p">(</span><span class="n">version</span><span class="o">=</span><span class="n">__version__</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;--verbose&quot;</span><span class="p">,</span> <span class="n">is_flag</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Enable verbose logging.&quot;</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">pass_context</span>
+<span class="k">def</span> <span class="nf">_main</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;An unofficial Farsight Security DNSDB client&quot;&quot;&quot;</span>
+    <span class="n">ctx</span><span class="o">.</span><span class="n">obj</span> <span class="o">=</span> <span class="n">_CLIConfig</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
+
+
+<span class="nd">@_main</span><span class="o">.</span><span class="n">command</span><span class="p">(</span><span class="s2">&quot;quotas&quot;</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">pass_context</span>
+<span class="k">def</span> <span class="nf">_get_quotas</span><span class="p">(</span><span class="n">ctx</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Show the API quotas for your API key and exit.&quot;&quot;&quot;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">ctx</span><span class="o">.</span><span class="n">obj</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">get_quotas</span><span class="p">(),</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+
+
+<span class="nd">@_main</span><span class="o">.</span><span class="n">command</span><span class="p">(</span><span class="s2">&quot;forward&quot;</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">argument</span><span class="p">(</span><span class="s2">&quot;owner_name&quot;</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;-t&quot;</span><span class="p">,</span> <span class="s2">&quot;--rrtype&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Filter results by DNS resource record &quot;</span>
+                                     <span class="s2">&quot;type.&quot;</span><span class="p">,</span>
+              <span class="n">default</span><span class="o">=</span><span class="s2">&quot;ANY&quot;</span><span class="p">,</span> <span class="n">show_default</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;-b&quot;</span><span class="p">,</span> <span class="s2">&quot;--bailiwick&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Filter results by DNS bailiwick.&quot;</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;--first-seen-before&quot;</span><span class="p">,</span>
+              <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Only show results first seen before this date.&quot;</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;--first-seen-after&quot;</span><span class="p">,</span>
+              <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Only show results first seen after this date.&quot;</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;--last-seen-before&quot;</span><span class="p">,</span>
+              <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Only show results last seen before this date.&quot;</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;--last-seen-after&quot;</span><span class="p">,</span>
+              <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Only show results last seen after this date.&quot;</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;-l&quot;</span><span class="p">,</span> <span class="s2">&quot;--limit&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span>
+              <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Limit the number of results to this number.&quot;</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;-s&quot;</span><span class="p">,</span> <span class="s2">&quot;--sort&quot;</span><span class="p">,</span> <span class="s2">&quot;sort_by&quot;</span><span class="p">,</span>
+              <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Sort JSON results by this field.&quot;</span><span class="p">,</span>
+              <span class="nb">type</span><span class="o">=</span><span class="n">click</span><span class="o">.</span><span class="n">Choice</span><span class="p">([</span><span class="s2">&quot;count&quot;</span><span class="p">,</span> <span class="s2">&quot;first_seen&quot;</span><span class="p">,</span> <span class="s2">&quot;last_seen&quot;</span><span class="p">,</span>
+                                 <span class="s2">&quot;rrname&quot;</span><span class="p">,</span> <span class="s2">&quot;rrtype&quot;</span><span class="p">,</span> <span class="s2">&quot;bailiwick&quot;</span><span class="p">,</span> <span class="s2">&quot;rdata&quot;</span><span class="p">,</span>
+                                 <span class="s2">&quot;source&quot;</span><span class="p">]),</span>
+
+              <span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;-r&quot;</span><span class="p">,</span> <span class="s2">&quot;--reverse&quot;</span><span class="p">,</span> <span class="n">is_flag</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Reverse the sorting.&quot;</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;-f&quot;</span><span class="p">,</span> <span class="s2">&quot;--format&quot;</span><span class="p">,</span> <span class="s2">&quot;_format&quot;</span><span class="p">,</span>
+              <span class="nb">type</span><span class="o">=</span><span class="n">click</span><span class="o">.</span><span class="n">Choice</span><span class="p">([</span><span class="s2">&quot;text&quot;</span><span class="p">,</span> <span class="s2">&quot;json&quot;</span><span class="p">,</span> <span class="s2">&quot;csv&quot;</span><span class="p">]),</span>
+              <span class="n">default</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="p">,</span> <span class="n">show_default</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+              <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Set the screen output format.&quot;</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;--output&quot;</span><span class="p">,</span> <span class="s2">&quot;-o&quot;</span><span class="p">,</span> <span class="s2">&quot;output_paths&quot;</span><span class="p">,</span>
+              <span class="nb">type</span><span class="o">=</span><span class="n">click</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">dir_okay</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">writable</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+              <span class="n">multiple</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+              <span class="n">help</span><span class="o">=</span><span class="s2">&quot;One or more output file paths that end in .csv, .json, &quot;</span>
+                   <span class="s2">&quot; or .txt (suppresses screen output).&quot;</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">pass_context</span>
+<span class="k">def</span> <span class="nf">_forward_lookup</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">owner_name</span><span class="p">,</span> <span class="n">rrtype</span><span class="o">=</span><span class="s2">&quot;ANY&quot;</span><span class="p">,</span> <span class="n">bailiwick</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                    <span class="n">first_seen_before</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">first_seen_after</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                    <span class="n">last_seen_before</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">last_seen_after</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                    <span class="n">limit</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sort_by</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                    <span class="n">_format</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="p">,</span> <span class="n">output_paths</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Forward DNS lookup.&quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="n">ctx</span><span class="o">.</span><span class="n">obj</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">forward_lookup</span><span class="p">(</span>
+            <span class="n">owner_name</span><span class="p">,</span> <span class="n">rrtype</span><span class="o">=</span><span class="n">rrtype</span><span class="p">,</span>
+            <span class="n">bailiwick</span><span class="o">=</span><span class="n">bailiwick</span><span class="p">,</span>
+            <span class="n">first_seen_before</span><span class="o">=</span><span class="n">first_seen_before</span><span class="p">,</span>
+            <span class="n">first_seen_after</span><span class="o">=</span><span class="n">first_seen_after</span><span class="p">,</span>
+            <span class="n">last_seen_before</span><span class="o">=</span><span class="n">last_seen_before</span><span class="p">,</span>
+            <span class="n">last_seen_after</span><span class="o">=</span><span class="n">last_seen_after</span><span class="p">,</span>
+            <span class="n">limit</span><span class="o">=</span><span class="n">limit</span><span class="p">,</span>
+            <span class="n">sort_by</span><span class="o">=</span><span class="n">sort_by</span><span class="p">,</span>
+            <span class="n">reverse</span><span class="o">=</span><span class="n">reverse</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">output_paths</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">_format</span> <span class="o">==</span> <span class="s2">&quot;json&quot;</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">dnsdb_results_to_json</span><span class="p">(</span><span class="n">results</span><span class="p">))</span>
+            <span class="k">elif</span> <span class="n">_format</span> <span class="o">==</span> <span class="s2">&quot;csv&quot;</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">dnsdb_results_to_csv</span><span class="p">(</span><span class="n">results</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">dnsdb_results_to_text</span><span class="p">(</span><span class="n">results</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">output_path</span> <span class="ow">in</span> <span class="n">output_paths</span><span class="p">:</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">output_path</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">output_file</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">output_path</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.json&quot;</span><span class="p">):</span>
+                        <span class="n">output_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">dnsdb_results_to_json</span><span class="p">(</span><span class="n">results</span><span class="p">))</span>
+                    <span class="k">elif</span> <span class="n">output_path</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.csv&quot;</span><span class="p">):</span>
+                        <span class="n">output_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">dnsdb_results_to_csv</span><span class="p">(</span><span class="n">results</span><span class="p">))</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">output_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">dnsdb_results_to_text</span><span class="p">(</span><span class="n">results</span><span class="p">))</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="fm">__str__</span><span class="p">())</span>
+        <span class="n">exit</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+
+<span class="nd">@_main</span><span class="o">.</span><span class="n">command</span><span class="p">(</span><span class="s2">&quot;inverse&quot;</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">argument</span><span class="p">(</span><span class="s2">&quot;query_type&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">click</span><span class="o">.</span><span class="n">Choice</span><span class="p">([</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;ip&quot;</span><span class="p">,</span> <span class="s2">&quot;raw&quot;</span><span class="p">]))</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">argument</span><span class="p">(</span><span class="s2">&quot;value&quot;</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;-t&quot;</span><span class="p">,</span> <span class="s2">&quot;--rrtype&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Filter results by DNS resource record &quot;</span>
+                                     <span class="s2">&quot;type.&quot;</span><span class="p">,</span>
+              <span class="n">default</span><span class="o">=</span><span class="s2">&quot;ANY&quot;</span><span class="p">,</span> <span class="n">show_default</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;--first-seen-before&quot;</span><span class="p">,</span>
+              <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Only show results first seen before this date.&quot;</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;--first-seen-after&quot;</span><span class="p">,</span>
+              <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Only show results first seen after this date.&quot;</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;--last-seen-before&quot;</span><span class="p">,</span>
+              <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Only show results last seen before this date.&quot;</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;--last-seen-after&quot;</span><span class="p">,</span>
+              <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Only show results last seen after this date.&quot;</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;-l&quot;</span><span class="p">,</span> <span class="s2">&quot;--limit&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span>
+              <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Limit the number of results to this number.&quot;</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;-s&quot;</span><span class="p">,</span> <span class="s2">&quot;--sort&quot;</span><span class="p">,</span> <span class="s2">&quot;sort_by&quot;</span><span class="p">,</span>
+              <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Sort JSON results by this field.&quot;</span><span class="p">,</span>
+              <span class="nb">type</span><span class="o">=</span><span class="n">click</span><span class="o">.</span><span class="n">Choice</span><span class="p">([</span><span class="s2">&quot;count&quot;</span><span class="p">,</span> <span class="s2">&quot;first_seen&quot;</span><span class="p">,</span> <span class="s2">&quot;last_seen&quot;</span><span class="p">,</span>
+                                 <span class="s2">&quot;rrname&quot;</span><span class="p">,</span> <span class="s2">&quot;rrtype&quot;</span><span class="p">,</span> <span class="s2">&quot;bailiwick&quot;</span><span class="p">,</span> <span class="s2">&quot;rdata&quot;</span><span class="p">,</span>
+                                 <span class="s2">&quot;source&quot;</span><span class="p">])</span>
+              <span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;-r&quot;</span><span class="p">,</span> <span class="s2">&quot;--reverse&quot;</span><span class="p">,</span> <span class="n">is_flag</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Reverse the sorting.&quot;</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;-f&quot;</span><span class="p">,</span> <span class="s2">&quot;--format&quot;</span><span class="p">,</span> <span class="s2">&quot;_format&quot;</span><span class="p">,</span>
+              <span class="nb">type</span><span class="o">=</span><span class="n">click</span><span class="o">.</span><span class="n">Choice</span><span class="p">([</span><span class="s2">&quot;text&quot;</span><span class="p">,</span> <span class="s2">&quot;json&quot;</span><span class="p">,</span> <span class="s2">&quot;csv&quot;</span><span class="p">]),</span>
+              <span class="n">default</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="p">,</span> <span class="n">show_default</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+              <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Set the screen output format.&quot;</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;--output&quot;</span><span class="p">,</span> <span class="s2">&quot;-o&quot;</span><span class="p">,</span> <span class="s2">&quot;output_paths&quot;</span><span class="p">,</span>
+              <span class="nb">type</span><span class="o">=</span><span class="n">click</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">dir_okay</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">writable</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+              <span class="n">multiple</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+              <span class="n">help</span><span class="o">=</span><span class="s2">&quot;One or more output file paths that end in .csv, .json, &quot;</span>
+                   <span class="s2">&quot; or .txt (suppresses screen output).&quot;</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">pass_context</span>
+<span class="k">def</span> <span class="nf">_inverse_lookup</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">query_type</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">rrtype</span><span class="o">=</span><span class="s2">&quot;ANY&quot;</span><span class="p">,</span>
+                    <span class="n">first_seen_before</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">first_seen_after</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                    <span class="n">last_seen_before</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">last_seen_after</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                    <span class="n">limit</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sort_by</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                    <span class="n">_format</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="p">,</span> <span class="n">output_paths</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Inverse DNS lookup.&quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="n">ctx</span><span class="o">.</span><span class="n">obj</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">inverse_lookup</span><span class="p">(</span>
+            <span class="n">query_type</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">rrtype</span><span class="o">=</span><span class="n">rrtype</span><span class="p">,</span>
+            <span class="n">first_seen_before</span><span class="o">=</span><span class="n">first_seen_before</span><span class="p">,</span>
+            <span class="n">first_seen_after</span><span class="o">=</span><span class="n">first_seen_after</span><span class="p">,</span>
+            <span class="n">last_seen_before</span><span class="o">=</span><span class="n">last_seen_before</span><span class="p">,</span>
+            <span class="n">last_seen_after</span><span class="o">=</span><span class="n">last_seen_after</span><span class="p">,</span>
+            <span class="n">limit</span><span class="o">=</span><span class="n">limit</span><span class="p">,</span>
+            <span class="n">sort_by</span><span class="o">=</span><span class="n">sort_by</span><span class="p">,</span>
+            <span class="n">reverse</span><span class="o">=</span><span class="n">reverse</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">output_paths</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">_format</span> <span class="o">==</span> <span class="s2">&quot;json&quot;</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">dnsdb_results_to_json</span><span class="p">(</span><span class="n">results</span><span class="p">))</span>
+            <span class="k">elif</span> <span class="n">_format</span> <span class="o">==</span> <span class="s2">&quot;csv&quot;</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">dnsdb_results_to_csv</span><span class="p">(</span><span class="n">results</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">dnsdb_results_to_text</span><span class="p">(</span><span class="n">results</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">output_path</span> <span class="ow">in</span> <span class="n">output_paths</span><span class="p">:</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">output_path</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">,</span>
+                          <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">,</span> <span class="n">newline</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">output_file</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">output_path</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.json&quot;</span><span class="p">):</span>
+                        <span class="n">output_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">dnsdb_results_to_json</span><span class="p">(</span><span class="n">results</span><span class="p">))</span>
+                    <span class="k">elif</span> <span class="n">output_path</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.csv&quot;</span><span class="p">):</span>
+                        <span class="n">output_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">dnsdb_results_to_csv</span><span class="p">(</span><span class="n">results</span><span class="p">))</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">output_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">dnsdb_results_to_text</span><span class="p">(</span><span class="n">results</span><span class="p">))</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="fm">__str__</span><span class="p">())</span>
+        <span class="n">exit</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">_main</span><span class="p">()</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Sean Whalen
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
