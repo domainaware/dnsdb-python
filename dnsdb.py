@@ -38,7 +38,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License."""
 
-__version__ = "1.2.1"
+__version__ = "1.2."
 
 locale.setlocale(locale.LC_ALL, '')
 
@@ -497,7 +497,12 @@ class DNSDBAPI(object):
         Performs a inverse DNS lookup
 
         Args:
-            _type (str): ``name``, ``ip``, or ``raw``
+            _type (str): One of the following:
+
+                - ``name``: A DNS domain name (use ``*`` as a wildcard)
+                - ``ip``: An IPv4 or IPv6 address, range, or CIDR notation
+                - ``raw``: An even number of hexadecimal digits
+
             value (str): The rdata value to search for
             rrtype (str): The DNS Resource Record type
             first_seen_before (str): Filter results first seen before this date
@@ -519,7 +524,9 @@ class DNSDBAPI(object):
             params["limit"] = limit
         _type = _type.lower()
         if _type not in ["name", "ip", "raw"]:
-            raise ValueError("_type must be name ip or raw")
+            raise ValueError("_type must be name, ip, or raw")
+        if _type == "ip":
+            value = value.replace("/", ",").replace("\\", ",")
         endpoint = "/lookup/rdata/{0}/{1}".format(_type, value)
         if rrtype is not None:
             endpoint += "/{0}".format(rrtype)

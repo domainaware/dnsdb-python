@@ -1,3 +1,9 @@
+1.2.2
+-----
+
+- Fix inverse lookups using CIDR notation
+- Create documentation
+
 1.2.1
 -----
 
