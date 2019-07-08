@@ -15,7 +15,8 @@ from setuptools import setup
 from codecs import open
 from os import path
 
-__version__ = "1.2.2"
+__version__ = "1.2.3"
+
 desc = "A full-featured unofficial Python client and CLI for " \
        "Farsight Security's DNSDB passive DNS service"
 
