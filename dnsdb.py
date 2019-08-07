@@ -330,6 +330,7 @@ class DNSDBAPI(object):
     """
 
     def __init__(self, api_key=None, client_name=None, client_version=None,
+                 user_id=None,
                  url_root="https://api.dnsdb.info"):
         """
         Configures the API client
@@ -339,12 +340,18 @@ class DNSDBAPI(object):
             ``DNSDB_KEY`` environment variable
             client_name (str): The client's name
             client_version (str): The client's version
+            user_id (str):  Client software specific identity of the user
+            of the API client. Comprised of an alphanumeric string, a colon,
+            and an alphanumeric string, limited to thirty characters. This may
+            be logged by the DNSDB API server. For example, dnsq:91e6245ad313
             url_root (str): The root URL of the DNSDB API
         """
         if "DNSDB_KEY" in os.environ:
             api_key = os.environ["DNSDB_KEY"]
         if "DNSDB_ROOT" in os.environ:
             url_root = os.environ["DNSDB_ROOT"]
+        if "DNSDB_USER" in os.environ:
+            user_id = os.environ["DNSDB_USER"]
         if api_key is None:
             raise InvalidAPIKey(
                 "An API key must provided as the api_key parameter, or the "
@@ -358,9 +365,9 @@ class DNSDBAPI(object):
         else:
             self.client_name = client_name,
             self.client_version = client_version
-
         user_agent = "{0}/{1}".format(self.client_name, self.client_version)
         default_headers = {"User-Agent": user_agent, "X-API-Key": api_key}
+        self._user_id = user_id
         self._root = url_root
         self._api_key = api_key
         self._session = session()
@@ -370,6 +377,8 @@ class DNSDBAPI(object):
              sort_by=None, reverse=False):
         default_params = dict(swclient=self.client_name,
                               version=self.client_version)
+        if self._user_id is not None:
+            default_params["id"] = self._user_id
         _params = copy.deepcopy(default_params)
         if params:
             _params.update(params)
@@ -432,15 +441,22 @@ class DNSDBAPI(object):
 
         return quotas
 
-    def forward_lookup(self, owner_name, rrtype="ANY", bailiwick=None,
-                       first_seen_before=None, first_seen_after=None,
-                       last_seen_before=None, last_seen_after=None,
-                       limit=None, sort_by=None, reverse=False):
+    def forward_lookup(self, owner_name, preview=False, max_count=None,
+                       aggregate=True, rrtype="ANY",
+                       bailiwick=None, first_seen_before=None,
+                       first_seen_after=None, last_seen_before=None,
+                       last_seen_after=None, limit=None, sort_by=None,
+                       reverse=False, offset=0):
         """
         Performs a forward DNS lookup
 
         Args:
             owner_name (str): The DNS Owner Name
+            preview (bool): Only return summary information
+            max_count (int):  controls stopping when we reach that summary
+            count. The resulting total count can exceed max_count as it will
+            include the entire count from the last rrset examined.
+            aggregate (bool): Group identical rrsets across all time periods
             rrtype (str): The DNS Resource Record type
             bailiwick (str): The DNS bailiwick
             first_seen_before (str): Filter results first seen before this date
@@ -450,6 +466,16 @@ class DNSDBAPI(object):
             limit (int): The maximum number of results to return
             sort_by: An optional field to sort by
             reverse (bool): Reverse the sorting
+            offset (int): How many rows to offset (e.g. skip) in the results
+
+        Warnings:
+            Note that DNSDB recalculates the results for each query and the
+            order of results might not be preserved. Therefore, the offset
+            capability is not a valid way to walk all results over multiple
+            queries -- some results might be missing and some might be
+            duplicated. The actual value that can be used is clamped or for
+            certain API keys, offset is ignored. See the ``offset_max``
+            quota key.
 
         Returns:
             Results as a Python list, or as text in DNS master file format
@@ -483,16 +509,19 @@ class DNSDBAPI(object):
             last_seen_after = _datetime_to_timestamp(
                 dateparser.parse(last_seen_after))
             params["time_last_after"] = last_seen_after
+        if offset != 0:
+            params["offset"] = offset
         try:
             return self._get(endpoint, params=params,
                              sort_by=sort_by, reverse=reverse)
         except _NoRecordsFound:
             return []
 
-    def inverse_lookup(self, _type, value, rrtype=None,
-                       first_seen_before=None, first_seen_after=None,
-                       last_seen_before=None, last_seen_after=None,
-                       limit=None, sort_by=None, reverse=None):
+    def inverse_lookup(self, _type, value, preview=False, aggregate=True,
+                       max_count=None, rrtype=None, first_seen_before=None,
+                       first_seen_after=None, last_seen_before=None,
+                       last_seen_after=None, limit=None, sort_by=None,
+                       reverse=None, offset=0):
         """
         Performs a inverse DNS lookup
 
@@ -504,6 +533,11 @@ class DNSDBAPI(object):
                 - ``raw``: An even number of hexadecimal digits
 
             value (str): The rdata value to search for
+            preview (bool): Only return summary information
+            max_count (int):  controls stopping when we reach that summary
+            count. The resulting total count can exceed max_count as it will
+            include the entire count from the last rrset examined.
+            aggregate (bool): Group identical rrsets across all time periods
             rrtype (str): The DNS Resource Record type
             first_seen_before (str): Filter results first seen before this date
             first_seen_after (str): Filter results first seen after this date
@@ -512,6 +546,16 @@ class DNSDBAPI(object):
             limit (int): The maximum number of results to return
             sort_by: An optional field to sort by
             reverse (bool): Reverse the sorting
+            offset (int): How many rows to offset (e.g. skip) in the results
+
+        Warnings:
+            Note that DNSDB recalculates the results for each query and the
+            order of results might not be preserved. Therefore, the offset
+            capability is not a valid way to walk all results over multiple
+            queries -- some results might be missing and some might be
+            duplicated. The actual value that can be used is clamped or for
+            certain API keys, offset is ignored. See the ``offset_max``
+            quota key.
 
         Returns:
             Results as a Python list, or as text in DNS master file format
@@ -546,6 +590,8 @@ class DNSDBAPI(object):
             last_seen_after = _datetime_to_timestamp(
                 dateparser.parse(last_seen_after))
             params["time_last_after"] = last_seen_after
+        if offset != 0:
+            params["offset"] = offset
 
         try:
             return self._get(endpoint, params=params,
