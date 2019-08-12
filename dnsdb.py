@@ -306,9 +306,22 @@ def dnsdb_results_to_csv(results):
     csv_file = StringIO()
     fields = ["bailiwick", "count", "first_seen", "last_seen", "source",
               "rrname", "rrtype", "rdata"]
+    if "bailiwick" not in results[0]:
+        fields = ["count", "num_results", "max_results", "time_first",
+                  "time_last", "zone_time_first", "zone_time_last"]
     csv = DictWriter(csv_file, fieldnames=fields)
     csv.writeheader()
     for result in results:
+        if "time_first" in result:
+            result["time_first"] = _timestamp_to_iso8601(result["time_first"])
+        if "time_last" in result:
+            result["time_last"] = _timestamp_to_iso8601(result["time_last"])
+        if "zone_time_first" in result:
+            result["zone_time_first"] = _timestamp_to_iso8601(
+                result["zone_time_first"])
+        if "zone_time_last" in result:
+            result["zone_time_last"] = _timestamp_to_iso8601(
+                result["zone_time_last"])
         if "first_seen" in result:
             result["first_seen"] = _timestamp_to_iso8601(result["first_seen"])
         if "last_seen" in result:
@@ -441,7 +454,7 @@ class DNSDBAPI(object):
 
         return quotas
 
-    def forward_lookup(self, owner_name, preview=False, max_count=None,
+    def forward_lookup(self, owner_name, summarize=False, max_count=None,
                        aggregate=True, rrtype="ANY",
                        bailiwick=None, first_seen_before=None,
                        first_seen_after=None, last_seen_before=None,
@@ -452,7 +465,7 @@ class DNSDBAPI(object):
 
         Args:
             owner_name (str): The DNS Owner Name
-            preview (bool): Only return summary information
+            summarize (bool): Only return summary information
             max_count (int):  controls stopping when we reach that summary
             count. The resulting total count can exceed max_count as it will
             include the entire count from the last rrset examined.
@@ -488,11 +501,18 @@ class DNSDBAPI(object):
             params["limit"] = limit
         if bailiwick is not None and rrtype is None:
             raise ValueError("rrtype must be specified when using bailiwick")
-        endpoint = "/lookup/rrset/name/{0}".format(owner_name)
+        if summarize:
+            endpoint = "/summarize/rrset/name/{0}".format(owner_name)
+            if max_count is not None:
+                params["max_count"] = max_count
+        else:
+            endpoint = "/lookup/rrset/name/{0}".format(owner_name)
         if rrtype is not None:
             endpoint += "/{0}".format(rrtype)
         if bailiwick is not None:
             endpoint += "/{0}".format(bailiwick)
+        if aggregate is False:
+            params["aggr"] = False
         if first_seen_before is not None:
             first_seen_before = _datetime_to_timestamp(
                 dateparser.parse(first_seen_before))
@@ -517,7 +537,7 @@ class DNSDBAPI(object):
         except _NoRecordsFound:
             return []
 
-    def inverse_lookup(self, _type, value, preview=False, aggregate=True,
+    def inverse_lookup(self, _type, value, summarize=False, aggregate=True,
                        max_count=None, rrtype=None, first_seen_before=None,
                        first_seen_after=None, last_seen_before=None,
                        last_seen_after=None, limit=None, sort_by=None,
@@ -533,7 +553,7 @@ class DNSDBAPI(object):
                 - ``raw``: An even number of hexadecimal digits
 
             value (str): The rdata value to search for
-            preview (bool): Only return summary information
+            summarize (bool): Only return summary information
             max_count (int):  controls stopping when we reach that summary
             count. The resulting total count can exceed max_count as it will
             include the entire count from the last rrset examined.
@@ -571,9 +591,16 @@ class DNSDBAPI(object):
             raise ValueError("_type must be name, ip, or raw")
         if _type == "ip":
             value = value.replace("/", ",").replace("\\", ",")
-        endpoint = "/lookup/rdata/{0}/{1}".format(_type, value)
+        if summarize:
+            endpoint = "/summarize/rdata/{0}/{1}".format(_type, value)
+            if max_count is not None:
+                params["max_count"] = max_count
+        else:
+            endpoint = "/lookup/rdata/{0}/{1}".format(_type, value)
         if rrtype is not None:
             endpoint += "/{0}".format(rrtype)
+        if aggregate is False:
+            params["aggr"] = False
         if first_seen_before is not None:
             first_seen_before = _datetime_to_timestamp(
                 dateparser.parse(first_seen_before))
