@@ -95,7 +95,7 @@ CLI
     Usage: dnsdb inverse [OPTIONS] [name|ip|raw] VALUE
 
       Inverse DNS lookup.
-    
+
     Options:
       -t, --rrtype TEXT               Filter results by DNS resource record type.
                                       [default: ANY]
