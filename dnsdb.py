@@ -289,6 +289,9 @@ def dnsdb_results_to_text(results):
         str: DNS master file content
     """
     results = copy.deepcopy(results)
+    if len(results) > 0:
+        if "bailiwick" not in results[0]:
+            raise ValueError("Summary results cannot be output in text")
     return "\n".join(list(map(lambda x: _dnsdb_result_to_text(x), results)))
 
 
@@ -306,9 +309,10 @@ def dnsdb_results_to_csv(results):
     csv_file = StringIO()
     fields = ["bailiwick", "count", "first_seen", "last_seen", "source",
               "rrname", "rrtype", "rdata"]
-    if "bailiwick" not in results[0]:
-        fields = ["count", "num_results", "max_results", "time_first",
-                  "time_last", "zone_time_first", "zone_time_last"]
+    if len(results) > 0:
+        if"source" not in results[0]:
+            fields = ["count", "num_results", "max_results", "time_first",
+                      "time_last", "zone_time_first", "zone_time_last"]
     csv = DictWriter(csv_file, fieldnames=fields)
     csv.writeheader()
     for result in results:
@@ -466,8 +470,8 @@ class DNSDBAPI(object):
         Args:
             owner_name (str): The DNS Owner Name
             summarize (bool): Only return summary information
-            max_count (int):  controls stopping when we reach that summary
-            count. The resulting total count can exceed max_count as it will
+            max_count (int):  Controls stopping when we reach that summary
+            count. The resulting total count can exceed max_count, as it will
             include the entire count from the last rrset examined.
             aggregate (bool): Group identical rrsets across all time periods
             rrtype (str): The DNS Resource Record type
@@ -496,6 +500,8 @@ class DNSDBAPI(object):
         """
         if rrtype is not None:
             rrtype = rrtype.upper()
+        if offset is None:
+            offset = 0
         params = dict()
         if limit is not None:
             params["limit"] = limit
@@ -554,8 +560,8 @@ class DNSDBAPI(object):
 
             value (str): The rdata value to search for
             summarize (bool): Only return summary information
-            max_count (int):  controls stopping when we reach that summary
-            count. The resulting total count can exceed max_count as it will
+            max_count (int):  Controls stopping when we reach that summary
+            count. The resulting total count can exceed max_count, as it will
             include the entire count from the last rrset examined.
             aggregate (bool): Group identical rrsets across all time periods
             rrtype (str): The DNS Resource Record type
@@ -583,6 +589,8 @@ class DNSDBAPI(object):
         """
         if rrtype is not None:
             rrtype = rrtype.upper()
+        if offset is None:
+            offset = 0
         params = dict()
         if limit is not None:
             params["limit"] = limit
@@ -683,6 +691,20 @@ def _get_quotas(ctx):
 
               )
 @click.option("-r", "--reverse", is_flag=True, help="Reverse the sorting.")
+@click.option("--flatten", is_flag=True,
+              help="Do not aggregate duplicate results over all time.")
+@click.option("--offset", type=int,
+              help="How many rows to offset (e.g. skip) in the results. "
+                   "The offset capability is not a valid way to walk all "
+                   "results over multiple queries -- some results might be "
+                   "missing and some might be duplicated.")
+@click.option("-s", "--summarize", is_flag=True,
+              help="Only show summary info.")
+@click.option("-m", "--max-count", type=int,
+              help="Controls stopping when we reach that summary"
+                   "count. The resulting total count can exceed max_count, as "
+                   "it will include the entire count from the last rrset "
+                   "examined.")
 @click.option("-f", "--format", "_format",
               type=click.Choice(["text", "json", "csv"]),
               default="text", show_default=True,
@@ -697,9 +719,12 @@ def _forward_lookup(ctx, owner_name, rrtype="ANY", bailiwick=None,
                     first_seen_before=None, first_seen_after=None,
                     last_seen_before=None, last_seen_after=None,
                     limit=None, sort_by=None, reverse=False,
-                    _format="text", output_paths=None):
+                    flatten=False, offset=None, summarize=False,
+                    max_count=None, _format="text",
+                    output_paths=None):
     """Forward DNS lookup."""
     try:
+        aggregate = flatten is False
         results = ctx.obj.client.forward_lookup(
             owner_name, rrtype=rrtype,
             bailiwick=bailiwick,
@@ -709,7 +734,11 @@ def _forward_lookup(ctx, owner_name, rrtype="ANY", bailiwick=None,
             last_seen_after=last_seen_after,
             limit=limit,
             sort_by=sort_by,
-            reverse=reverse
+            reverse=reverse,
+            aggregate=aggregate,
+            offset=offset,
+            summarize=summarize,
+            max_count=max_count
         )
         if len(output_paths) == 0:
             if _format == "json":
@@ -755,6 +784,20 @@ def _forward_lookup(ctx, owner_name, rrtype="ANY", bailiwick=None,
                                  "source"])
               )
 @click.option("-r", "--reverse", is_flag=True, help="Reverse the sorting.")
+@click.option("--flatten", is_flag=True,
+              help="Do not aggregate duplicate results over all time.")
+@click.option("--offset", type=int,
+              help="How many rows to offset (e.g. skip) in the results. "
+                   "The offset capability is not a valid way to walk all "
+                   "results over multiple queries -- some results might be "
+                   "missing and some might be duplicated.")
+@click.option("-s", "--summarize", is_flag=True,
+              help="Only show summary info.")
+@click.option("-m", "--max-count", type=int,
+              help="Controls stopping when we reach that summary"
+                   "count. The resulting total count can exceed max_count, as "
+                   "it will include the entire count from the last rrset "
+                   "examined.")
 @click.option("-f", "--format", "_format",
               type=click.Choice(["text", "json", "csv"]),
               default="text", show_default=True,
@@ -769,9 +812,11 @@ def _inverse_lookup(ctx, query_type, value, rrtype="ANY",
                     first_seen_before=None, first_seen_after=None,
                     last_seen_before=None, last_seen_after=None,
                     limit=None, sort_by=None, reverse=False,
-                    _format="text", output_paths=None):
+                    flatten=False, offset=None, summarize=False,
+                    max_count=None, _format="text", output_paths=None):
     """Inverse DNS lookup."""
     try:
+        aggregate = flatten is False
         results = ctx.obj.client.inverse_lookup(
             query_type, value, rrtype=rrtype,
             first_seen_before=first_seen_before,
@@ -780,7 +825,11 @@ def _inverse_lookup(ctx, query_type, value, rrtype="ANY",
             last_seen_after=last_seen_after,
             limit=limit,
             sort_by=sort_by,
-            reverse=reverse
+            reverse=reverse,
+            aggregate=aggregate,
+            offset=offset,
+            summarize=summarize,
+            max_count=max_count
         )
         if len(output_paths) == 0:
             if _format == "json":

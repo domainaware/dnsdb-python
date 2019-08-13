@@ -4,7 +4,7 @@
 - Add support for new DNSDB features introduced on 2019-08-01, including
 
   - User IDs
-  - Previewing result sizes
+  - Previewing result count through summarize
   - Result volume across time
   - Result offsets
 
