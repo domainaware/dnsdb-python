@@ -289,9 +289,6 @@ def dnsdb_results_to_text(results):
         str: DNS master file content
     """
     results = copy.deepcopy(results)
-    if len(results) > 0:
-        if "bailiwick" not in results[0]:
-            raise ValueError("Summary results cannot be output in text")
     return "\n".join(list(map(lambda x: _dnsdb_result_to_text(x), results)))
 
 

@@ -78,10 +78,10 @@ CLI
                                       queries -- some results might be missing and
                                       some might be duplicated.
       -s, --summarize                 Only show summary info.
-      -m, --max-count INTEGER         Controls stopping when we reach that
-                                      summarycount. The resulting total count can
-                                      exceed max_count, as it will include the
-                                      entire count from the last rrset examined.
+      -m, --max-count INTEGER         Controls stopping when we reach that summary
+                                      count. The resulting total count can exceed
+                                      max_count, as it will include the entire
+                                      count from the last rrset examined.
       -f, --format [text|json|csv]    Set the screen output format.  [default:
                                       text]
       -o, --output FILE               One or more output file paths that end in
@@ -95,7 +95,7 @@ CLI
     Usage: dnsdb inverse [OPTIONS] [name|ip|raw] VALUE
 
       Inverse DNS lookup.
-
+    
     Options:
       -t, --rrtype TEXT               Filter results by DNS resource record type.
                                       [default: ANY]
@@ -118,10 +118,10 @@ CLI
                                       queries -- some results might be missing and
                                       some might be duplicated.
       -s, --summarize                 Only show summary info.
-      -m, --max-count INTEGER         Controls stopping when we reach that
-                                      summarycount. The resulting total count can
-                                      exceed max_count, as it will include the
-                                      entire count from the last rrset examined.
+      -m, --max-count INTEGER         Controls stopping when we reach that summary
+                                      count. The resulting total count can exceed
+                                      max_count, as it will include the entire
+                                      count from the last rrset examined.
       -f, --format [text|json|csv]    Set the screen output format.  [default:
                                       text]
       -o, --output FILE               One or more output file paths that end in
