@@ -70,10 +70,22 @@ CLI
       -s, --sort [count|first_seen|last_seen|rrname|rrtype|bailiwick|rdata|source]
                                       Sort JSON results by this field.
       -r, --reverse                   Reverse the sorting.
+      --flatten                       Do not aggregate duplicate results over all
+                                      time.
+      --offset INTEGER                How many rows to offset (e.g. skip) in the
+                                      results. The offset capability is not a
+                                      valid way to walk all results over multiple
+                                      queries -- some results might be missing and
+                                      some might be duplicated.
+      -s, --summarize                 Only show summary info.
+      -m, --max-count INTEGER         Controls stopping when we reach that
+                                      summarycount. The resulting total count can
+                                      exceed max_count, as it will include the
+                                      entire count from the last rrset examined.
       -f, --format [text|json|csv]    Set the screen output format.  [default:
                                       text]
       -o, --output FILE               One or more output file paths that end in
-                                      .csv, .json,  or .txt (suppresses screen
+                                      .csv, .json, or .txt (suppresses screen
                                       output).
       --help                          Show this message and exit.
 
@@ -98,10 +110,22 @@ CLI
       -s, --sort [count|first_seen|last_seen|rrname|rrtype|bailiwick|rdata|source]
                                       Sort JSON results by this field.
       -r, --reverse                   Reverse the sorting.
+      --flatten                       Do not aggregate duplicate results over all
+                                      time.
+      --offset INTEGER                How many rows to offset (e.g. skip) in the
+                                      results. The offset capability is not a
+                                      valid way to walk all results over multiple
+                                      queries -- some results might be missing and
+                                      some might be duplicated.
+      -s, --summarize                 Only show summary info.
+      -m, --max-count INTEGER         Controls stopping when we reach that
+                                      summarycount. The resulting total count can
+                                      exceed max_count, as it will include the
+                                      entire count from the last rrset examined.
       -f, --format [text|json|csv]    Set the screen output format.  [default:
                                       text]
       -o, --output FILE               One or more output file paths that end in
-                                      .csv, .json,  or .txt (suppresses screen
+                                      .csv, .json, or .txt (suppresses screen
                                       output).
       --help                          Show this message and exit.
 

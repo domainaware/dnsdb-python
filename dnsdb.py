@@ -701,7 +701,7 @@ def _get_quotas(ctx):
 @click.option("-s", "--summarize", is_flag=True,
               help="Only show summary info.")
 @click.option("-m", "--max-count", type=int,
-              help="Controls stopping when we reach that summary"
+              help="Controls stopping when we reach that summary "
                    "count. The resulting total count can exceed max_count, as "
                    "it will include the entire count from the last rrset "
                    "examined.")
@@ -713,7 +713,7 @@ def _get_quotas(ctx):
               type=click.Path(dir_okay=False, writable=True),
               multiple=True,
               help="One or more output file paths that end in .csv, .json, "
-                   " or .txt (suppresses screen output).")
+                   "or .txt (suppresses screen output).")
 @click.pass_context
 def _forward_lookup(ctx, owner_name, rrtype="ANY", bailiwick=None,
                     first_seen_before=None, first_seen_after=None,
@@ -794,7 +794,7 @@ def _forward_lookup(ctx, owner_name, rrtype="ANY", bailiwick=None,
 @click.option("-s", "--summarize", is_flag=True,
               help="Only show summary info.")
 @click.option("-m", "--max-count", type=int,
-              help="Controls stopping when we reach that summary"
+              help="Controls stopping when we reach that summary "
                    "count. The resulting total count can exceed max_count, as "
                    "it will include the entire count from the last rrset "
                    "examined.")
@@ -806,7 +806,7 @@ def _forward_lookup(ctx, owner_name, rrtype="ANY", bailiwick=None,
               type=click.Path(dir_okay=False, writable=True),
               multiple=True,
               help="One or more output file paths that end in .csv, .json, "
-                   " or .txt (suppresses screen output).")
+                   "or .txt (suppresses screen output).")
 @click.pass_context
 def _inverse_lookup(ctx, query_type, value, rrtype="ANY",
                     first_seen_before=None, first_seen_after=None,
