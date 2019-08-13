@@ -7,6 +7,7 @@ from __future__ import print_function
 
 import os
 import logging
+import re
 import json
 import locale
 import copy
@@ -306,23 +307,9 @@ def dnsdb_results_to_csv(results):
     csv_file = StringIO()
     fields = ["bailiwick", "count", "first_seen", "last_seen", "source",
               "rrname", "rrtype", "rdata"]
-    if len(results) > 0:
-        if"source" not in results[0]:
-            fields = ["count", "num_results", "max_results", "time_first",
-                      "time_last", "zone_time_first", "zone_time_last"]
     csv = DictWriter(csv_file, fieldnames=fields)
     csv.writeheader()
     for result in results:
-        if "time_first" in result:
-            result["time_first"] = _timestamp_to_iso8601(result["time_first"])
-        if "time_last" in result:
-            result["time_last"] = _timestamp_to_iso8601(result["time_last"])
-        if "zone_time_first" in result:
-            result["zone_time_first"] = _timestamp_to_iso8601(
-                result["zone_time_first"])
-        if "zone_time_last" in result:
-            result["zone_time_last"] = _timestamp_to_iso8601(
-                result["zone_time_last"])
         if "first_seen" in result:
             result["first_seen"] = _timestamp_to_iso8601(result["first_seen"])
         if "last_seen" in result:
@@ -386,6 +373,14 @@ class DNSDBAPI(object):
         self._api_key = api_key
         self._session = session()
         self._session.headers.update(default_headers)
+        if self._user_id is not None:
+            if len(re.findall(r"[a-zA-Z0-9]+:[a-zA-Z0-9]+",
+                              self._user_id)) != 1:
+                raise ValueError(
+                    "User ID must consist of two alphanumeric strings"
+                    "separated by a colon")
+            if len(self._user_id) > 30:
+                raise ValueError("User ID cannot be longer than 30 characters")
 
     def _get(self, endpoint, params=None, _json=True,
              sort_by=None, reverse=False):
