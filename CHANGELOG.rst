@@ -1,3 +1,10 @@
+1.2.4
+-----
+
+- Fix sorting when data is missing
+- Always end newlines in files with ``\n`` (Fix output in Windows)
+- Prepare for Python 3.9
+
 1.2.3
 -----
 

@@ -38,7 +38,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License."""
 
-__version__ = "1.2.3"
+__version__ = "1.2.4"
 
 locale.setlocale(locale.LC_ALL, '')
 
@@ -170,7 +170,7 @@ def _load_json(dnsdb_json_string, sort_by=None, reverse=False):
     results = []
     for line in dnsdb_json_string.split("\n"):
         if len(line) > 1:
-            result = json.loads(line, encoding="uft-8")
+            result = json.loads(line)
             new_result = OrderedDict()
             if "bailiwick" in result:
                 new_result["bailiwick"] = result["bailiwick"]
@@ -193,14 +193,14 @@ def _load_json(dnsdb_json_string, sort_by=None, reverse=False):
 
             results.append(new_result)
 
+    def _sorter(_result):
+        if sort_by in _result:
+            return _result[sort_by]
+        return 0
     if sort_by is not None:
-        try:
-            results = list(sorted(
-                results,
-                key=lambda x: x[sort_by], reverse=reverse))
-        except KeyError:
-            raise KeyError("Unable to sort by {0}. "
-                           "Field does not exist".format(sort_by))
+        results = list(sorted(
+            results,
+            key=_sorter, reverse=reverse))
     for result in results:
         if "first_seen" in result:
             result["first_seen"] = _epoch_to_datetime(
@@ -647,7 +647,7 @@ def _forward_lookup(ctx, owner_name, rrtype="ANY", bailiwick=None,
                 print(dnsdb_results_to_text(results))
         else:
             for output_path in output_paths:
-                with open(output_path, "w") as output_file:
+                with open(output_path, "w", newline="\n") as output_file:
                     if output_path.lower().endswith(".json"):
                         output_file.write(dnsdb_results_to_json(results))
                     elif output_path.lower().endswith(".csv"):
