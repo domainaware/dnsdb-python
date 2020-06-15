@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>dnsdb-python &mdash; dnsdb-python 1.2.3 documentation</title>
+  <title>dnsdb-python &mdash; dnsdb-python 1.2.4 documentation</title>
   
 
   
@@ -21,10 +21,10 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script type="text/javascript" src="_static/jquery.js"></script>
-        <script type="text/javascript" src="_static/underscore.js"></script>
-        <script type="text/javascript" src="_static/doctools.js"></script>
-        <script type="text/javascript" src="_static/language_data.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -58,7 +58,7 @@
             
             
               <div class="version">
-                1.2.3
+                1.2.4
               </div>
             
           
@@ -276,20 +276,20 @@ environment variable named <code class="docutils literal notranslate"><span clas
 <div class="section" id="module-dnsdb">
 <span id="python-api"></span><h2>Python API<a class="headerlink" href="#module-dnsdb" title="Permalink to this headline">¶</a></h2>
 <p>An unofficial Farsight Security DNSDB client</p>
-<dl class="exception">
+<dl class="py exception">
 <dt id="dnsdb.BadRequest">
 <em class="property">exception </em><code class="sig-prename descclassname">dnsdb.</code><code class="sig-name descname">BadRequest</code><a class="reference internal" href="_modules/dnsdb.html#BadRequest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dnsdb.BadRequest" title="Permalink to this definition">¶</a></dt>
 <dd><p>Raised then a request is improperly formatted</p>
 </dd></dl>
 
-<dl class="class">
+<dl class="py class">
 <dt id="dnsdb.DNSDBAPI">
-<em class="property">class </em><code class="sig-prename descclassname">dnsdb.</code><code class="sig-name descname">DNSDBAPI</code><span class="sig-paren">(</span><em class="sig-param">api_key=None</em>, <em class="sig-param">client_name=None</em>, <em class="sig-param">client_version=None</em>, <em class="sig-param">url_root='https://api.dnsdb.info'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dnsdb.html#DNSDBAPI"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dnsdb.DNSDBAPI" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">dnsdb.</code><code class="sig-name descname">DNSDBAPI</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">api_key</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">client_name</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">client_version</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">url_root</span><span class="o">=</span><span class="default_value">'https://api.dnsdb.info'</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dnsdb.html#DNSDBAPI"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dnsdb.DNSDBAPI" title="Permalink to this definition">¶</a></dt>
 <dd><p>A Python interface to the Farsight Security DNSDB API
 ..</p>
-<dl class="method">
+<dl class="py method">
 <dt id="dnsdb.DNSDBAPI.forward_lookup">
-<code class="sig-name descname">forward_lookup</code><span class="sig-paren">(</span><em class="sig-param">owner_name</em>, <em class="sig-param">rrtype='ANY'</em>, <em class="sig-param">bailiwick=None</em>, <em class="sig-param">first_seen_before=None</em>, <em class="sig-param">first_seen_after=None</em>, <em class="sig-param">last_seen_before=None</em>, <em class="sig-param">last_seen_after=None</em>, <em class="sig-param">limit=None</em>, <em class="sig-param">sort_by=None</em>, <em class="sig-param">reverse=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dnsdb.html#DNSDBAPI.forward_lookup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dnsdb.DNSDBAPI.forward_lookup" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">forward_lookup</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">owner_name</span></em>, <em class="sig-param"><span class="n">rrtype</span><span class="o">=</span><span class="default_value">'ANY'</span></em>, <em class="sig-param"><span class="n">bailiwick</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">first_seen_before</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">first_seen_after</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">last_seen_before</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">last_seen_after</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">limit</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">sort_by</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">reverse</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dnsdb.html#DNSDBAPI.forward_lookup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dnsdb.DNSDBAPI.forward_lookup" title="Permalink to this definition">¶</a></dt>
 <dd><p>Performs a forward DNS lookup</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -313,9 +313,9 @@ if <code class="docutils literal notranslate"><span class="pre">return_text</spa
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="dnsdb.DNSDBAPI.inverse_lookup">
-<code class="sig-name descname">inverse_lookup</code><span class="sig-paren">(</span><em class="sig-param">_type</em>, <em class="sig-param">value</em>, <em class="sig-param">rrtype=None</em>, <em class="sig-param">first_seen_before=None</em>, <em class="sig-param">first_seen_after=None</em>, <em class="sig-param">last_seen_before=None</em>, <em class="sig-param">last_seen_after=None</em>, <em class="sig-param">limit=None</em>, <em class="sig-param">sort_by=None</em>, <em class="sig-param">reverse=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dnsdb.html#DNSDBAPI.inverse_lookup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dnsdb.DNSDBAPI.inverse_lookup" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">inverse_lookup</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">_type</span></em>, <em class="sig-param"><span class="n">value</span></em>, <em class="sig-param"><span class="n">rrtype</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">first_seen_before</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">first_seen_after</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">last_seen_before</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">last_seen_after</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">limit</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">sort_by</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">reverse</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dnsdb.html#DNSDBAPI.inverse_lookup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dnsdb.DNSDBAPI.inverse_lookup" title="Permalink to this definition">¶</a></dt>
 <dd><p>Performs a inverse DNS lookup</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -347,20 +347,20 @@ if <code class="docutils literal notranslate"><span class="pre">return_text</spa
 
 </dd></dl>
 
-<dl class="exception">
+<dl class="py exception">
 <dt id="dnsdb.DNSDBAPIError">
 <em class="property">exception </em><code class="sig-prename descclassname">dnsdb.</code><code class="sig-name descname">DNSDBAPIError</code><a class="reference internal" href="_modules/dnsdb.html#DNSDBAPIError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dnsdb.DNSDBAPIError" title="Permalink to this definition">¶</a></dt>
 <dd><p>Raised when an error is returned by DNSDB</p>
 </dd></dl>
 
-<dl class="exception">
+<dl class="py exception">
 <dt id="dnsdb.InvalidAPIKey">
 <em class="property">exception </em><code class="sig-prename descclassname">dnsdb.</code><code class="sig-name descname">InvalidAPIKey</code><a class="reference internal" href="_modules/dnsdb.html#InvalidAPIKey"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dnsdb.InvalidAPIKey" title="Permalink to this definition">¶</a></dt>
 <dd><p>Raised when the API key is invalid, or the client IP address is not
 authorized for the account</p>
 </dd></dl>
 
-<dl class="exception">
+<dl class="py exception">
 <dt id="dnsdb.QuotaExceeded">
 <em class="property">exception </em><code class="sig-prename descclassname">dnsdb.</code><code class="sig-name descname">QuotaExceeded</code><a class="reference internal" href="_modules/dnsdb.html#QuotaExceeded"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dnsdb.QuotaExceeded" title="Permalink to this definition">¶</a></dt>
 <dd><p>Raised when the API quota limit has been exceeded</p>
@@ -372,28 +372,28 @@ purchase a larger quota.</p>
 burst window. The window will automatically reopen at its end.</p>
 </dd></dl>
 
-<dl class="exception">
+<dl class="py exception">
 <dt id="dnsdb.ServerSideError">
 <em class="property">exception </em><code class="sig-prename descclassname">dnsdb.</code><code class="sig-name descname">ServerSideError</code><a class="reference internal" href="_modules/dnsdb.html#ServerSideError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dnsdb.ServerSideError" title="Permalink to this definition">¶</a></dt>
 <dd><p>Raised when a server side error occurs</p>
 </dd></dl>
 
-<dl class="exception">
+<dl class="py exception">
 <dt id="dnsdb.TooManyConnections">
 <em class="property">exception </em><code class="sig-prename descclassname">dnsdb.</code><code class="sig-name descname">TooManyConnections</code><a class="reference internal" href="_modules/dnsdb.html#TooManyConnections"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dnsdb.TooManyConnections" title="Permalink to this definition">¶</a></dt>
 <dd><p>Raised when the limit of number of concurrent connections is exceeded</p>
 </dd></dl>
 
-<dl class="exception">
+<dl class="py exception">
 <dt id="dnsdb.UnauthorizedAPIKey">
 <em class="property">exception </em><code class="sig-prename descclassname">dnsdb.</code><code class="sig-name descname">UnauthorizedAPIKey</code><a class="reference internal" href="_modules/dnsdb.html#UnauthorizedAPIKey"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dnsdb.UnauthorizedAPIKey" title="Permalink to this definition">¶</a></dt>
 <dd><p>Raised when the API key is not authorized
 (usually indicates the block quota is expired)</p>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="dnsdb.dnsdb_results_to_csv">
-<code class="sig-prename descclassname">dnsdb.</code><code class="sig-name descname">dnsdb_results_to_csv</code><span class="sig-paren">(</span><em class="sig-param">results</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dnsdb.html#dnsdb_results_to_csv"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dnsdb.dnsdb_results_to_csv" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">dnsdb.</code><code class="sig-name descname">dnsdb_results_to_csv</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">results</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dnsdb.html#dnsdb_results_to_csv"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dnsdb.dnsdb_results_to_csv" title="Permalink to this definition">¶</a></dt>
 <dd><p>Converts DNSDB results to CSV format</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -408,9 +408,9 @@ burst window. The window will automatically reopen at its end.</p>
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="dnsdb.dnsdb_results_to_json">
-<code class="sig-prename descclassname">dnsdb.</code><code class="sig-name descname">dnsdb_results_to_json</code><span class="sig-paren">(</span><em class="sig-param">results</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dnsdb.html#dnsdb_results_to_json"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dnsdb.dnsdb_results_to_json" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">dnsdb.</code><code class="sig-name descname">dnsdb_results_to_json</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">results</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dnsdb.html#dnsdb_results_to_json"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dnsdb.dnsdb_results_to_json" title="Permalink to this definition">¶</a></dt>
 <dd><p>Converts DNSDB results to pretty JSON</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -425,9 +425,9 @@ burst window. The window will automatically reopen at its end.</p>
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="dnsdb.dnsdb_results_to_text">
-<code class="sig-prename descclassname">dnsdb.</code><code class="sig-name descname">dnsdb_results_to_text</code><span class="sig-paren">(</span><em class="sig-param">results</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dnsdb.html#dnsdb_results_to_text"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dnsdb.dnsdb_results_to_text" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">dnsdb.</code><code class="sig-name descname">dnsdb_results_to_text</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">results</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dnsdb.html#dnsdb_results_to_text"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dnsdb.dnsdb_results_to_text" title="Permalink to this definition">¶</a></dt>
 <dd><p>Converts DNSDB results to text in DNS master File format</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
